@@ -1,5 +1,13 @@
-## How to launch a job template or workflow template via REST API call
+---
+title: How to launch a job or workflow via REST API call
+tags: ["Ansible", "Tower", "job", "REST"]
+categories: Ansible
+layout: post
+modified_date: 2020-08-08
+---
+## How to launch a job or workflow via REST API call
 
+{% raw %}
 ```yaml
   tasks:
   - name: Launch Tower Job
@@ -30,4 +38,6 @@
     retries: 2
     delay: 120
 ```
+{% endraw %}
+
 Noted that extra_vars need to be set to prompt on launch in order to allow passing extra variables thru the REST API call.  Current version of Tower (3.4) does not allow prompt on launch for workflow template.  So we need to create a survey form with the intended extra variables name.

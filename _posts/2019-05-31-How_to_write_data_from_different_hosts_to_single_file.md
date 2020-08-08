@@ -1,3 +1,9 @@
+---
+title: How to write data from multiple hosts to a single file
+tags: ["Ansible", "set_fact", "blockinfile"]
+categories: Ansible
+layout: post
+---
 ### How to write data from multiple hosts to a single file
 
 We need to gather information from multiple hosts and store them to a single file.  Possibly email it to someone as an attachment.
@@ -5,6 +11,7 @@ We need to gather information from multiple hosts and store them to a single fil
 We can use lineinfile or blockinfile module with delegate_to localhost to write the information to a single file.  However, both modules do not handle concurrent write probably.  The file will be overwritten by the same task of different host.
 
 **Solution 1:  Use Serial**
+{% raw %}
 ```yaml
 ---
 - hosts: all
@@ -29,9 +36,12 @@ We can use lineinfile or blockinfile module with delegate_to localhost to write 
     delegate_to: localhost
     run_once: true
 ```
+{% endraw %}
+
 This will execcute the blockinfile task one at a time.  However, it might not be possible if other tasks need to be run concurrently.
 
 **Solution 2: Use facts and loop**
+{% raw %}
 ```yaml
 ---
 - hosts: all
@@ -66,4 +76,5 @@ This will execcute the blockinfile task one at a time.  However, it might not be
     delegate_to: localhost
     run_once: true
 ```
+{% endraw %}
 The information will be stored as facts.  The blockinfile task will loop thru the list of play hosts and execute one a time.

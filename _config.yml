@@ -53,7 +53,7 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
-title: Some technical things
+title: Something technical ...
 description: ""
 markdown: kramdown
 author:

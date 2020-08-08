@@ -1,6 +1,13 @@
+---
+title: How to sort a list of dictionay objects
+tags: ["Ansible", "dictionary", "list"]
+categories: Ansible
+layout: post
+---
 ### How to sort a list of dict objects
 
 Example data from list of datastores from vCenter:
+{% raw %}
 ```shell
         "datastores": [
             {
@@ -44,19 +51,22 @@ Example data from list of datastores from vCenter:
             },
         ]
 ```
+{% endraw %}
+
 We want to sort the list of datastores by the available freeSpace
-```yaml
 {% raw %}
+```yaml
   - name: Print the list of datastores sorted by freeSpace
     debug:
       msg: "{{ datastore_facts.datastores | sort(attribute='freeSpace') }}"
-{% endraw %}
 ```
+{% endraw %}
+
 How about just the one with most freeSpace?  Reverse the sort and first item is the one with most freeSpace.
-```yaml
 {% raw %}
+```yaml
   - name: Print the list of datastores sorted by freeSpace
     debug:
       msg: "{{ datastore_facts.datastores | sort(attribute='freeSpace', reverse=true) | list | first }}"
-{% endraw %}
 ```
+{% endraw %}
