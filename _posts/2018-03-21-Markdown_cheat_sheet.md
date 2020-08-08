@@ -1,3 +1,9 @@
+---
+title: Markdown cheatsheet
+tags: ["markdown"]
+categories: Markdown
+layout: post
+---
 ## Where to get markdown language syntax and cheat sheet?
 
 [Markdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)

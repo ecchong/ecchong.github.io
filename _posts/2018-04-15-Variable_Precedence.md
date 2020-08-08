@@ -1,3 +1,9 @@
+---
+title: How to determine variable precedence
+tags: ["Ansible"]
+categories: Ansible
+layout: post
+---
 ### Lowest precedence to hightest
 1. Role default variables
 2. Inventory variables

@@ -1,3 +1,9 @@
+---
+title: How to run task only on the first node in group
+tags: ["Ansible", "inventory"]
+categories: Ansible
+layout: post
+---
 ## How to run task only on first node in group
 
 Check the group array

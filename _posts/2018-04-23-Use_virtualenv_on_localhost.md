@@ -1,3 +1,9 @@
+---
+title: How to use virtualenv Python on localhost
+tags: ["Ansible", "virtual environment", "Python"]
+categories: Ansible
+layout: post
+---
 ### Force to use virtualenv python
 When running modules that require virtualenv, such as Azure, local_action or localhost connection sometimes still  use the  default /usr/bin/python
 

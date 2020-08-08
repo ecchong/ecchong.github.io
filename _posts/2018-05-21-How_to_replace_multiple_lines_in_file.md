@@ -1,3 +1,9 @@
+---
+title: How to replace multiple lines in file
+tags: ["Ansible", "lineinfile", "blockinfile", "RegEx"]
+categories: Ansible
+layout: post
+---
 ### Replacing multiple lines in file
 ```yaml
 - name: Set some kernel parameters

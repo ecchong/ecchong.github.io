@@ -1,3 +1,9 @@
+---
+title: How to loop
+tags: ["Ansible", "loop"]
+categories: Ansible
+layout: post
+---
 ### Loops
 
 https://chromatichq.com/blog/untangling-ansible-loops

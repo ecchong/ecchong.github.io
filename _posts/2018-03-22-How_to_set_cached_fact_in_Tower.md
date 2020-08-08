@@ -1,3 +1,9 @@
+---
+title: How to set cached fact in Tower
+tags: ["Ansible", "set_fact", "Tower"]
+categories: Ansible
+layout: post
+---
 # How to set persistent fact in Tower?
 
 The playbook set_fact task must set "cacheable: true"

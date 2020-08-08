@@ -1,3 +1,9 @@
+---
+title: How to test connection to host
+tags: ["Ansible", "wait_for_connection"]
+categories: Ansible
+layout: post
+---
 ### How to test connection to host
 
 We need to test connection to hosts, and run tasks on hosts that are online.  Hosts that are offline will be marked unreachable.  We need to clear them and continue next tasks on all hosts no matter they are online or off.

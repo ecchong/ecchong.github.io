@@ -1,3 +1,9 @@
+---
+title: How to wait until a lock file is removed by other process
+tags: ["Ansible", "stat"]
+categories: Ansible
+layout: post
+---
 ### Wait until a lock file is removed by other process
 ```yaml
   - name: Wait until lock file is

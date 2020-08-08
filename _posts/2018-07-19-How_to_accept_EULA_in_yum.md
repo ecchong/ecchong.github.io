@@ -1,3 +1,9 @@
+---
+title: How to accept EULA when yum installing something?
+tags: ["Ansible", "yum"]
+categories: Ansible
+layout: post
+---
 ### How to accept EULA when yum installing something?
 
 ```

@@ -1,3 +1,9 @@
+---
+title: How to check async task status
+tags: ["Ansible", "async_status"]
+categories: Ansible
+layout: post
+---
 ### How to check async task status
 
 ```yaml
@@ -7,7 +13,7 @@ To check task status, use async_status module
 Required parameter: Job or task identifier:
 
 ---
-\# Async status - fire-forget.yml
+# Async status - fire-forget.yml
 - name: Async status with fire and forget task
   hosts: demoservers
   remote_user: devops

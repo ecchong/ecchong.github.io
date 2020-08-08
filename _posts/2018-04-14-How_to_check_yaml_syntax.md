@@ -1,3 +1,9 @@
+---
+title: How to check yaml syntax
+tags: ["Ansible", "yaml"]
+categories: Ansible
+layout: post
+---
 ### Using python yaml module
 ```shell
 python -c 'import yaml, sys; print yaml.load(sys.stdin);' < my_playbook.yml

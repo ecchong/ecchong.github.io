@@ -1,3 +1,9 @@
+---
+title: How to enable or disable a host during import
+tags: ["Ansible", "inventory"]
+categories: Ansible
+layout: post
+---
 ### How to enable or disable a host during import
 
 We want to able to control the available of a managed host that is imported from dynamic inventory script.  Default behavior only allow disabling manually created host.  Host imported with dynamic inventory is always enabled.

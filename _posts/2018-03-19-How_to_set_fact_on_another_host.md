@@ -1,3 +1,9 @@
+---
+title: How to set fact on another host
+tags: ["Ansible", "set_fact", "inventory"]
+categories: Ansible
+layout: post
+---
 ## How to set fact on another host?
 
 Use delegate_to and delegate_fact together
