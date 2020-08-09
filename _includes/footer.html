@@ -5,6 +5,7 @@
 
     <div class="footer-col-wrapper">
       <div class="footer-col">
+      <!--
         <p class="feed-subscribe">
           <a href="{{ 'feed.xml' | relative_url }}">
             <svg class="svg-icon orange">
@@ -12,6 +13,7 @@
             </svg><span>Subscribe</span>
           </a>
         </p>
+      -->
       {%- if site.author %}
         <ul class="contact-list">
           {% if site.author.name -%}
@@ -24,7 +26,12 @@
       {%- endif %}
       </div>
       <div class="footer-col">
-        <p>{{ site.description | escape }}</p>
+        <!--
+        <p>{{ site.description | escape }}</p> 
+        -->
+          <a href="https://www.linkedin.com/in/ericchong4linux">
+            <img src="/assets/linkedin.svg" width="32" height="32">
+          </a>
       </div>
     </div>
 
