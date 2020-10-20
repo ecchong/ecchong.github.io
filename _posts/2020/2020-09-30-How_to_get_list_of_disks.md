@@ -1,5 +1,5 @@
 ---
-title: How to search on Tower
+title: How to get a list of disks from facts
 tags: ["Ansible", "facts", "search"]
 categories: Ansible
 layout: post

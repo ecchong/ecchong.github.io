@@ -7,6 +7,7 @@ layout: post
 ## Oracle SQLcl sqlformat
 
 - Set display format
+{% raw %}
 ```SQL
 SQL> set sqlformat ansiconsole;
 SQL> select owner, table_name from all_tables where owner LIKE 'HR%';
@@ -37,3 +38,4 @@ SQL> select owner, table_name from all_tables where owner LIKE 'HR%';
 {"owner":"HR","table_name":"REGIONS"},{"owner":"HR","table_name":"COUNTRIES"},{"owner":"HR","table_name":"LOCATIONS"},{"owner":"HR","table_name":"DEPARTMENTS"},{"owner":"HR","table_name":"JOBS"},{"owner":"HR","table_name":"EMPLOYEES"},{"owner":"HR","table_name":"JOB_HISTORY"}]}]}
 7 rows selected.
 ```
+{% endraw %}
