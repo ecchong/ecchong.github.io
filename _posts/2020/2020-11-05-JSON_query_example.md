@@ -18,7 +18,7 @@ First pull the interfaces information using __virsh qemu-agent-command__.
 ```
 {% endraw %}
 
-The return output uses "-", therefore we need to do inline substitution with __sed__.  The final output looks like this:
+The returned output uses "-", therefore we need to do inline substitution with __sed__.  The final JSON output looks like this:
 
 {% raw %}
 ```json
@@ -79,7 +79,7 @@ The return output uses "-", therefore we need to do inline substitution with __s
     ]
 }
 ```
-{% endraaw %}
+{% endraw %}
 
 We are only interested on the ipv4 address on eth0.  Use the following json_query to pull it into Ansible
 
