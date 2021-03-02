@@ -53,11 +53,11 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
-title: Something technical ...
+title: My Notes...
 description: ""
 markdown: kramdown
 author:
   name: Eric Chong
-  email: echong@iisl.com
+  email: ecchong [at] gmail.com
 google_analytics: UA-174979775-1
 linkedin_username: ericchong4linux
