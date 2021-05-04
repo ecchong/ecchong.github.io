@@ -3,6 +3,7 @@ title: How to use Jinja2 inside a playbook
 tags: ["Ansible", "Jinja2"]
 categories: Ansible
 layout: post
+modified_date: 2021-05-04
 ---
 ### How to use Jinja2 inside a playbook
 
@@ -50,5 +51,19 @@ layout: post
   tasks:
   - set_facts:
       env_vars:  "{{ test if ( env == 'test' ) else uat if ( env == 'uat' ) else prod if ( env == 'prod' ) }}"
+```
+{% endraw %}
+
+5. Create a list from another list with additional info
+{% raw %}
+```yaml
+  - name: Generate routes for DC1 PER01
+    set_fact:
+      new_routes: |
+        {% set routes = [] %}
+        {% for i in routes_to_add %}
+        {% set _ = routes.append("router static vrf " + vrf|string + " address-family ipv4 unicast " + i + " " + bundle + "." + vlan|string + " " + firewall) %}
+        {% endfor %}
+        {{ routes }}
 ```
 {% endraw %}
