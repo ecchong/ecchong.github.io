@@ -53,7 +53,7 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
-title: My Notes...
+title: Automate that...
 description: ""
 markdown: kramdown
 author:
