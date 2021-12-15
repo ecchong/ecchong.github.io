@@ -13,6 +13,7 @@ oc create clusterrolebinding user-aggregate-olm-view --clusterrole=aggregate-olm
 ```
 
 - Cluster Admin also need to create an OperatorGroup for your namespace. Create `operator-group.yaml`
+
 ```
 apiVersion: operators.coreos.com/v1alpha2
 kind: OperatorGroup
@@ -29,6 +30,7 @@ oc create -n myspace -f operator-group.yaml
 ````
 
 - As admin of your namespace, create a subscription for AAP 2.1 operator.  Create file `subscription.yml`
+
 ```
 ---
 apiVersion: operators.coreos.com/v1alpha1
@@ -43,11 +45,13 @@ spec:
   source: redhat-operators
   sourceNamespace: openshift-marketplace
 ```
+
 ```
 oc create -f subscription.yml
 ```
 
 - As admin of your namespace, create a automation controller.  Create file `automation-controller.yaml`
+
 ```
 ---
 apiVersion: automationcontroller.ansible.com/v1beta1
