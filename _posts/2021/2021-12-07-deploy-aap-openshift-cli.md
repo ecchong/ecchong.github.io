@@ -12,7 +12,7 @@ layout: post
 oc create clusterrolebinding user-aggregate-olm-view --clusterrole=aggregate-olm-view --user=myname
 ```
 
-- Cluster Admin also need to create an OperatorGroup for your namespace. Create `operator-group.yaml`
+- Cluster Admin also need to create an OperatorGroup for your namespace. Create operator-group.yaml
 
 ```
 apiVersion: operators.coreos.com/v1alpha2
