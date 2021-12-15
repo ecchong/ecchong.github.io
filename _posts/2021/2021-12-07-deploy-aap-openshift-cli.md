@@ -23,6 +23,7 @@ spec:
   targetNamespaces:
   - myspace
 ```
+
 ```
 oc create -n myspace -f operator-group.yaml
 ````
