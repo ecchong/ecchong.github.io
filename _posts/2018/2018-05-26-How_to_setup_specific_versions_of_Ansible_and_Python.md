@@ -2,7 +2,7 @@
 title: How to install virtual environment with specific versions of Python and Ansible
 tags: ["Ansible", "Python", "virtual environment"]
 categories: Ansible
-layout: post
+
 ---
 ### How to install a virtual environment with specific versions of Python and Ansible
 ```shell

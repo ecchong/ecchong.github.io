@@ -2,7 +2,7 @@
 title: How to setup RHEL 8 to run as a kiosk
 tags: ["rhel", "kiosk" ]
 categories: RHEL
-layout: post
+
 ---
 
 # How to setup RHEL 8 to run as a kiosk

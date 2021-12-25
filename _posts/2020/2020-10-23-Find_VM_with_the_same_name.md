@@ -2,7 +2,7 @@
 title: Find VM with the same name
 tags: ["Ansible", "VMware", "vm"]
 categories: Ansible
-layout: post
+
 ---
 ## Find VM with the same name
 We want to make sure the VM only exists in the folder we want or not exists at all.

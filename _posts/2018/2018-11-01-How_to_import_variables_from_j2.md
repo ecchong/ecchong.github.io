@@ -2,7 +2,7 @@
 title: How to expand a variables using Jinja2 template
 tags: ["Ansible", "Jinja2", "filter", "lookup"]
 categories: Ansible
-layout: post
+
 ---
 ## How to expand a variables using Jinja2 template
 

@@ -2,7 +2,7 @@
 title: Ansible Variables Precedence Gotcha
 tags: ["ansible", "linux"]
 categories: Ansible
-layout: post
+
 ---
 
 I recently got tripped by Ansible variables precedence.  We are familiar with the [precedence concept](https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#:~:text=Ansible%20does%20apply%20variable%20precedence,in%20role%2Fdefaults%2Fmain.). Sometime in a complex playbooks, it help to remember how variables are loaded.

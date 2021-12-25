@@ -2,7 +2,7 @@
 title: How to check async task status
 tags: ["Ansible", "async_status"]
 categories: Ansible
-layout: post
+
 ---
 ### How to check async task status
 

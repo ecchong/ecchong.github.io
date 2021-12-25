@@ -2,7 +2,7 @@
 title: How to write data from multiple hosts to a single file
 tags: ["Ansible", "set_fact", "blockinfile"]
 categories: Ansible
-layout: post
+
 ---
 ### How to write data from multiple hosts to a single file
 

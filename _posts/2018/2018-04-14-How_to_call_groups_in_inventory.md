@@ -2,7 +2,7 @@
 title: How to call groups in the inventory
 tags: ["Ansible", "inventory"]
 categories: Ansible
-layout: post
+
 ---
 #
 ### To see all hosts in the inventory

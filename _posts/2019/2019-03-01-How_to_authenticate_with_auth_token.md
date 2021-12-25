@@ -2,7 +2,7 @@
 title: How to authenticate with token to REST API
 tags: ["Ansible", "REST", "token"]
 categories: Ansible
-layout: post
+
 ---
 ## How to authenticate with server and retrieve a token.  Then submit a JSON file via REST API.
 

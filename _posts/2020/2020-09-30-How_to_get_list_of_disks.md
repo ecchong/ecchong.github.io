@@ -2,7 +2,7 @@
 title: How to get a list of disks from facts
 tags: ["Ansible", "facts", "search"]
 categories: Ansible
-layout: post
+
 ---
 ## Get the list of block devices from facts gathering
 

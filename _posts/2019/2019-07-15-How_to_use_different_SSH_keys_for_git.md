@@ -2,7 +2,7 @@
 title: How to use different SSH keys for different Git Repos
 tags: ["Ansible", "SSH", "Git"]
 categories: Ansible
-layout: post
+
 ---
 ### How to use different SSH keys for different Git repos
 

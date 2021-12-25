@@ -2,7 +2,7 @@
 title: How to enable or disable a host during import
 tags: ["Ansible", "inventory"]
 categories: Ansible
-layout: post
+
 ---
 ### How to enable or disable a host during import
 

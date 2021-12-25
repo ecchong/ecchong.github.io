@@ -2,7 +2,7 @@
 title: How to cache facts locally when not using Tower
 tags: ["Ansible", "fact"]
 categories: Ansible
-layout: post
+
 ---
 ### How to cache facts locally when not using Tower
 

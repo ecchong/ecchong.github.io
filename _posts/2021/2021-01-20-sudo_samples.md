@@ -2,7 +2,6 @@
 title: Sudo Samples
 tags: ["sudo", "linux", "unix"]
 categories: Linux
-layout: post
 ---
 ## Sudoer samples
 Sources

@@ -2,7 +2,7 @@
 title: How to run tasks on some nodes only
 tags: ["Ansible", "inventory"] 
 categories: Ansible
-layout: post
+
 ---
 ## How to run tasks on some nodes only
 

@@ -2,7 +2,7 @@
 title: How to start asynchronous task and check status
 tags: ["Ansible", "async_status"]
 categories: Ansible
-layout: post
+
 ---
 ### Start the asynchronous task and check status later
 ```yaml

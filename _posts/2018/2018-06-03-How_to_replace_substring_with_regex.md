@@ -2,7 +2,7 @@
 title: How to replace a substring in variable with regex
 tags: ["Ansible", "RegEx", "filter", "regex_replace"]
 categories: Ansible
-layout: post
+
 ---
 ### How to replace a substring in variable with regex
 

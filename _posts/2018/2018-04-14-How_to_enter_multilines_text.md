@@ -2,7 +2,7 @@
 title: How to enter multilines text
 tags: ["Ansible"]
 categories: Ansible
-layout: post
+
 ---
 ### Use | or > sign
 

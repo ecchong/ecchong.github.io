@@ -2,7 +2,7 @@
 title: How to update a text file
 tags: ["Ansible", "RegEx", "lineinfile"]
 categories: Ansible
-layout: post
+
 ---
 ### How to update text file
 

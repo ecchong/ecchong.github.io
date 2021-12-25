@@ -2,7 +2,7 @@
 title: How to sort a list of dictionay objects
 tags: ["Ansible", "dictionary", "list"]
 categories: Ansible
-layout: post
+
 ---
 ### How to sort a list of dict objects
 

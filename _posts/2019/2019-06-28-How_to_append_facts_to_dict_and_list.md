@@ -2,7 +2,7 @@
 title: How to append facts to a dictionary and append it to a list
 tags: ["Ansible", "set_fact", "dictionary", "list"]
 categories: Ansible
-layout: post
+
 ---
 ### How to append facts to a dictionary and append it to a list
 

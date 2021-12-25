@@ -2,7 +2,7 @@
 title: Gettinng libselinux-python error in virtual environment or SCL
 tags: ["ansible", "linux", "selinux"]
 categories: Ansible
-layout: post
+
 ---
 
 Getting this error when running Ansible template task with Python3 in virtual environment or SCL

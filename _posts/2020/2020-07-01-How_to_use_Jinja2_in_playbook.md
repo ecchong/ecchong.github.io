@@ -2,7 +2,7 @@
 title: How to use Jinja2 inside a playbook
 tags: ["Ansible", "Jinja2"]
 categories: Ansible
-layout: post
+
 modified_date: 2021-05-04
 ---
 ### How to use Jinja2 inside a playbook

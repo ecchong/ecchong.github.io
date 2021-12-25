@@ -2,7 +2,7 @@
 title: How to create smart inventory
 tags: ["Ansible", "inventory", "smart inventory", "Tower"]
 categories: Ansible
-layout: post
+
 modified_date: 2021-03-02
 ---
 ### Smart inventory filter examples

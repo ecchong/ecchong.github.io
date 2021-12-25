@@ -2,7 +2,7 @@
 title: How to create a host in Tower inventory
 tags: ["Ansible", "Tower", "REST"]
 categories: Ansible
-layout: post
+
 ---
 ## How to create a host in Tower via REST API call?
 

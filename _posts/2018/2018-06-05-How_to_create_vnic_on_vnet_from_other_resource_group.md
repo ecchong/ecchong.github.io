@@ -2,7 +2,7 @@
 title: How to create a virtual NIC on vnet from a different resource group
 tags: ["Ansible", "Azure"]
 categories: Ansible
-layout: post
+
 ---
 ### How to create a virtual NIC on vnet from a different resource group.
 

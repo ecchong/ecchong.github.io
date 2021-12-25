@@ -2,7 +2,7 @@
 title: How to use Azure Rest API
 tags: ["Ansible", "Azure", "Cloud"]
 categories: Ansible
-layout: post
+
 ---
 ### How to use Azure REST API.
 

@@ -2,7 +2,7 @@
 title: How to launch a job or workflow via REST API call
 tags: ["Ansible", "Tower", "job", "REST"]
 categories: Ansible
-layout: post
+
 modified_date: 2020-08-08
 ---
 ## How to launch a job or workflow via REST API call

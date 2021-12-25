@@ -2,7 +2,7 @@
 title: Example usage of the new Oracle SQLcl client sqlformat
 tags: ["Oracle", "SQLcl", "SQL"]
 categories: Oracle
-layout: post
+
 ---
 ## Oracle SQLcl sqlformat
 

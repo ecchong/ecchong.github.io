@@ -2,7 +2,7 @@
 title: How to use user data to setup WinRM for Ansible on AWS Windows Instance
 tags: ["Ansible", "AWS", "Windows", "WinRM"]
 categories: Ansible
-layout: post
+
 ---
 ### How to use user data to setup WinRM on AWS
 

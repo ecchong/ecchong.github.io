@@ -2,7 +2,7 @@
 title: How to search activity stream on Tower
 tags: ["Ansible", "Tower", "activity stream"]
 categories: Ansible
-layout: post
+
 ---
 ## How to search events in activtiy stream
 

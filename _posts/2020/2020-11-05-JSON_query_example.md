@@ -2,7 +2,7 @@
 title: json_query example with multiple search patterns
 tags: ["Ansible", "json_query", "libvirt", "kvm", "virsh"]
 categories: Ansible
-layout: post
+
 ---
 ## Find VM IP address when not on the defined VM network
 We deployed a KVM VM using macvtap connect directly to the physical network and getting a DHCP address.  How can we get the VM IP address from the hypervisor and use it in Ansible?

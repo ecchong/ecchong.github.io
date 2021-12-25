@@ -2,7 +2,7 @@
 title: How to check yaml syntax
 tags: ["Ansible", "yaml"]
 categories: Ansible
-layout: post
+
 ---
 ### Using python yaml module
 ```shell

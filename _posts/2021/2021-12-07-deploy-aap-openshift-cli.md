@@ -2,7 +2,8 @@
 title: How to deploy AAP 2.1 on OpenShift from CLI
 tags: ["openshift", "operator", "ansible", "aap" ]
 categories: Ansible
-layout: post
+category_archive: Ansible
+tag_archive: ["openshift", "operator", "ansible", "aap" ]
 ---
 
 # How to deploy AAP 2.1 on OpenShift from CLI without Cluster Admin privileges (kind of)
@@ -14,7 +15,7 @@ oc create clusterrolebinding user-aggregate-olm-view --clusterrole=aggregate-olm
 
 - Cluster Admin also need to create an OperatorGroup for your namespace. Create operator-group.yaml
 
-```
+```yaml
 apiVersion: operators.coreos.com/v1alpha2
 kind: OperatorGroup
 metadata:
@@ -25,13 +26,13 @@ spec:
   - myspace
 ```
 
-```
+```shell
 oc create -n myspace -f operator-group.yaml
 ````
 
 - As admin of your namespace, create a subscription for AAP 2.1 operator.  Create file `subscription.yml`
 
-```
+```yaml
 ---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -46,13 +47,13 @@ spec:
   sourceNamespace: openshift-marketplace
 ```
 
-```
+```shell
 oc create -f subscription.yml
 ```
 
 - As admin of your namespace, create a automation controller.  Create file `automation-controller.yaml`
 
-```
+```yaml
 ---
 apiVersion: automationcontroller.ansible.com/v1beta1
 kind: AutomationController

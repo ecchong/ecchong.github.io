@@ -2,7 +2,7 @@
 title: How to setup Tower notification for MS Team
 tags: ["Ansible", "Tower", "notification", "Microsoft Teams"]
 categories: Ansible
-layout: post
+
 ---
 ## Setup Tower notification for MS Teams
 

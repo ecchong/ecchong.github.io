@@ -2,7 +2,7 @@
 title: How to filter hosts on Tower inventory import
 tags: ["ansible", "tower", "vcenter", "vmware"]
 categories: Ansible
-layout: post
+
 ---
 
 # How to filter hosts on Tower inventory import

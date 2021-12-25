@@ -2,7 +2,7 @@
 title: How to test connection to host
 tags: ["Ansible", "wait_for_connection"]
 categories: Ansible
-layout: post
+
 ---
 ### How to test connection to host
 

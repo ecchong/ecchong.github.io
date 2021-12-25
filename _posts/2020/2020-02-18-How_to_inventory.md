@@ -2,7 +2,7 @@
 title: How to setup inventory file
 tags: ["Ansible", "invenory"]
 categories: Ansible
-layout: post
+
 ---
 ## How to setup inventory
 

@@ -2,7 +2,7 @@
 title: How to launch Tower job using Curl
 tags: ["Ansible", "Tower", "job", "curl"]
 categories: Ansible
-layout: post
+
 ---
 ### How to launch Tower job using Curl
 

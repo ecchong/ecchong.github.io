@@ -2,7 +2,7 @@
 title: How to search on Tower
 tags: ["Ansible", "Tower", "search"]
 categories: Ansible
-layout: post
+
 ---
 ## Some examples to use the search box in Tower to filter or create smart inventory
 

@@ -2,7 +2,7 @@
 title: How to add a custom firewall rule to ESXi
 tags: ["VMware", "ESXi", "firewall"]
 categories: VMware
-layout: post
+
 ---
 ## How to add a custom firewall rule to ESXi
 

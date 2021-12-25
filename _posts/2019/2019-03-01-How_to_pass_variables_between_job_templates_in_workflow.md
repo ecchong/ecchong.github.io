@@ -2,7 +2,7 @@
 title: How to pass variables between job templates in a workflow template
 tags: ["Ansible", "Tower", "job"]
 categories: Ansible
-layout: post
+
 ---
 ## How to pass variables between job templates in a workflow template
 

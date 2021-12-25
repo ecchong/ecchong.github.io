@@ -2,7 +2,7 @@
 title: Create user with shared home
 tags: ["Ansible", "jinja2", "user"]
 categories: Ansible
-layout: post
+
 ---
 ## Create user with shared home
 When /home is on a NFS mount, most likely the user home directory is already created from other hosts.  Use following steps to avoid error when creating user but not creating the home directory.
