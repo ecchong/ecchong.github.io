@@ -1,0 +1,29 @@
+I" <h2 id="find-vm-with-the-same-name">Find VM with the same name</h2>
+<p>We want to make sure the VM only exists in the folder we want or not exists at all.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Find VM with the same name</span>
+  <span class="na">vmware_guest_find</span><span class="pi">:</span>
+    <span class="na">hostname</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">vmware_vm_vcenter.hostname</span><span class="nv"> </span><span class="s">}}"</span>
+    <span class="na">username</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">vmware_vm_vcenter.username</span><span class="nv"> </span><span class="s">}}"</span>
+    <span class="na">password</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">vmware_vm_vcenter.password</span><span class="nv"> </span><span class="s">}}"</span>
+    <span class="na">validate_certs</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">vmware_vm_vcenter.validate_certs</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">default(false)</span><span class="nv"> </span><span class="s">}}"</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">vmware_vm_vm.name</span><span class="nv"> </span><span class="s">}}"</span>
+  <span class="na">register</span><span class="pi">:</span> <span class="s">find_vm</span>
+  <span class="na">delegate_to</span><span class="pi">:</span> <span class="s">localhost</span>
+  <span class="na">ignore_errors</span><span class="pi">:</span> <span class="no">true</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">VM already exists.  Setup search string to match folder name.</span>
+  <span class="na">set_fact</span><span class="pi">:</span>
+    <span class="na">find_vm_search_string</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">vmware_vm_vm.folder</span><span class="nv"> </span><span class="s">}}$"</span>
+  <span class="na">when</span><span class="pi">:</span> <span class="s">not find_vm.failed</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Make sure VM exists only in the desired folder</span>
+  <span class="na">assert</span><span class="pi">:</span>
+    <span class="na">that</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">find_vm.folders | length == </span><span class="m">1</span>
+    <span class="pi">-</span> <span class="s">find_vm.folders[0] | regex_search( find_vm_search_string )</span>
+    <span class="na">fail_msg</span><span class="pi">:</span> <span class="s2">"</span><span class="s">VM</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">vmware_vm_vm.name</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">already</span><span class="nv"> </span><span class="s">exists</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">find_vm.folders</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">default()</span><span class="nv"> </span><span class="s">}}"</span>
+  <span class="na">when</span><span class="pi">:</span> <span class="s">not find_vm.faile</span>
+</code></pre></div></div>
+
+:ET

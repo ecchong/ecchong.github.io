@@ -1,0 +1,20 @@
+I"�<p>#</p>
+<h3 id="to-see-all-hosts-in-the-inventory">To see all hosts in the inventory</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">ansible all -i inventory --list-hosts</span>
+<span class="s">ansible '*' -i inventory --list-hosts</span>
+</code></pre></div></div>
+<h3 id="to-see-all-hosts-by-wild-cards">To see all hosts by wild cards</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">ansible '*.example.com' -i inventory --list-hosts</span>
+<span class="s">ansible '192.168.1.*' -i inventory --list-hosts</span>
+</code></pre></div></div>
+<h3 id="to-see-hosts-in-groups-lab-or-datacenter1">To see hosts in groups ‘lab’ or ‘datacenter1’</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">ansible lab:datacenter1 -i inventory --list-hosts</span>
+</code></pre></div></div>
+<h3 id="to-see-hosts-in-groups-lab-and-datacenter1">To see hosts in groups ‘lab’ and ‘datacenter1’</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">ansible 'lab:&amp;datacenter1' -i inventory --list-hosts</span>
+</code></pre></div></div>
+<p>need single quote because of special character ‘&amp;’</p>
+<h3 id="to-see-all-hosts-in-group-datacenter-except-test2examplecom">To see all hosts in group ‘datacenter’ except test2.example.com</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">ansible 'datacenter:!test2.example.com' -i inventory --list-hosts</span>
+</code></pre></div></div>
+:ET

@@ -1,0 +1,27 @@
+I"ª<h2 id="how-to-run-tasks-on-some-nodes-only">How to run tasks on some nodes only</h2>
+
+<h3 id="only-on-first-node-in-group">Only on first node in group</h3>
+
+<p>Check the group array</p>
+
+<p>For example</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Ping first node listed in group "tower"</span>
+  <span class="na">ping</span><span class="pi">:</span>
+  <span class="na">when</span><span class="pi">:</span> <span class="s">inventory_hostname == groups['tower'][0]</span>
+</code></pre></div></div>
+
+<h3 id="only-if-node-is-in-group">Only if node is in group</h3>
+
+<p>Is the host in group node_b?</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="pi">-</span> <span class="na">hosts</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">node_a</span>
+  <span class="pi">-</span> <span class="s">node_b</span>
+  <span class="na">gather_facts</span><span class="pi">:</span> <span class="s">no</span>
+
+  <span class="na">tasks</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">ping</span><span class="pi">:</span>
+    <span class="na">when</span><span class="pi">:</span> <span class="s">inventory_hostname in groups['node_b']</span>
+</code></pre></div></div>
+:ET

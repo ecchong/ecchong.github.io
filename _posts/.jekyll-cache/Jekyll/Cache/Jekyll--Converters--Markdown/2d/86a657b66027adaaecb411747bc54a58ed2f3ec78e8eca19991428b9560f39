@@ -1,0 +1,143 @@
+I"§<h2 id="sudoer-samples">Sudoer samples</h2>
+<p>Sources</p>
+<ul>
+  <li><a href="http://www.courtesan.com/sudo/sample.sudoers">http://www.courtesan.com/sudo/sample.sudoers</a></li>
+  <li><a href="https://www.sudo.ws/readme.html">https://www.sudo.ws/readme.html</a></li>
+</ul>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#</span>
+<span class="c"># Sample /etc/sudoers file.</span>
+<span class="c">#</span>
+<span class="c"># This file MUST be edited with the 'visudo' command as root.</span>
+<span class="c">#</span>
+<span class="c"># See the sudoers man page for the details on how to write a sudoers file.</span>
+
+<span class="c">##</span>
+<span class="c"># Override built-in defaults</span>
+<span class="c">##</span>
+Defaults		<span class="nv">syslog</span><span class="o">=</span>auth
+Defaults&gt;root		<span class="o">!</span>set_logname
+Defaults:FULLTIMERS	<span class="o">!</span>lecture
+Defaults:millert	<span class="o">!</span>authenticate
+Defaults@SERVERS	log_year, <span class="nv">logfile</span><span class="o">=</span>/var/log/sudo.log
+Defaults!PAGERS		noexec
+
+<span class="c">##</span>
+<span class="c"># User alias specification</span>
+<span class="c">##</span>
+User_Alias	FULLTIMERS <span class="o">=</span> millert, mikef, dowdy
+User_Alias	PARTTIMERS <span class="o">=</span> bostley, jwfox, crawl
+User_Alias	WEBMASTERS <span class="o">=</span> will, wendy, wim
+
+<span class="c">##</span>
+<span class="c"># Runas alias specification</span>
+<span class="c">##</span>
+Runas_Alias	OP <span class="o">=</span> root, operator
+Runas_Alias	DB <span class="o">=</span> oracle, sybase
+
+<span class="c">##</span>
+<span class="c"># Host alias specification</span>
+<span class="c">##</span>
+Host_Alias	SPARC <span class="o">=</span> bigtime, eclipse, moet, anchor:<span class="se">\</span>
+		SGI <span class="o">=</span> grolsch, dandelion, black:<span class="se">\</span>
+		ALPHA <span class="o">=</span> widget, thalamus, foobar:<span class="se">\</span>
+		HPPA <span class="o">=</span> boa, nag, python
+Host_Alias	CUNETS <span class="o">=</span> 128.138.0.0/255.255.0.0
+Host_Alias	CSNETS <span class="o">=</span> 128.138.243.0, 128.138.204.0/24, 128.138.242.0
+Host_Alias	SERVERS <span class="o">=</span> master, mail, www, ns
+Host_Alias	CDROM <span class="o">=</span> orion, perseus, hercules
+
+<span class="c">##</span>
+<span class="c"># Cmnd alias specification</span>
+<span class="c">##</span>
+Cmnd_Alias	DUMPS <span class="o">=</span> /usr/sbin/dump, /usr/sbin/rdump, /usr/sbin/restore, <span class="se">\</span>
+			/usr/sbin/rrestore, /usr/bin/mt, <span class="se">\</span>
+			sha224:0GomF8mNN3wlDt1HD9XldjJ3SNgpFdbjO1+NsQ<span class="o">==</span> <span class="se">\</span>
+			/home/operator/bin/start_backups
+Cmnd_Alias	KILL <span class="o">=</span> /usr/bin/kill
+Cmnd_Alias	PRINTING <span class="o">=</span> /usr/sbin/lpc, /usr/bin/lprm
+Cmnd_Alias	SHUTDOWN <span class="o">=</span> /usr/sbin/shutdown
+Cmnd_Alias	HALT <span class="o">=</span> /usr/sbin/halt
+Cmnd_Alias	REBOOT <span class="o">=</span> /usr/sbin/reboot
+Cmnd_Alias	SHELLS <span class="o">=</span> /sbin/sh, /usr/bin/sh, /usr/bin/csh, /usr/bin/ksh, <span class="se">\</span>
+			 /usr/local/bin/tcsh, /usr/bin/rsh, <span class="se">\</span>
+			 /usr/local/bin/zsh
+Cmnd_Alias	SU <span class="o">=</span> /usr/bin/su
+Cmnd_Alias	VIPW <span class="o">=</span> /usr/sbin/vipw, /usr/bin/passwd, /usr/bin/chsh, <span class="se">\</span>
+		       /usr/bin/chfn
+Cmnd_Alias	PAGERS <span class="o">=</span> /usr/bin/more, /usr/bin/pg, /usr/bin/less
+
+<span class="c">##</span>
+<span class="c"># User specification</span>
+<span class="c">##</span>
+
+<span class="c"># root and users in group wheel can run anything on any machine as any user</span>
+root		ALL <span class="o">=</span> <span class="o">(</span>ALL<span class="o">)</span> ALL
+%wheel		ALL <span class="o">=</span> <span class="o">(</span>ALL<span class="o">)</span> ALL
+
+<span class="c"># full time sysadmins can run anything on any machine without a password</span>
+FULLTIMERS	ALL <span class="o">=</span> NOPASSWD: ALL
+
+<span class="c"># part time sysadmins may run anything but need a password</span>
+PARTTIMERS	ALL <span class="o">=</span> ALL
+
+<span class="c"># jack may run anything on machines in CSNETS</span>
+jack		CSNETS <span class="o">=</span> ALL
+
+<span class="c"># lisa may run any command on any host in CUNETS (a class B network)</span>
+lisa		CUNETS <span class="o">=</span> ALL
+
+<span class="c"># operator may run maintenance commands and anything in /usr/oper/bin/</span>
+operator	ALL <span class="o">=</span> DUMPS, KILL, SHUTDOWN, HALT, REBOOT, PRINTING,<span class="se">\</span>
+		sudoedit /etc/printcap, /usr/oper/bin/
+
+<span class="c"># joe may su only to operator</span>
+joe		ALL <span class="o">=</span> /usr/bin/su operator
+
+<span class="c"># pete may change passwords for anyone but root on the hp snakes</span>
+pete		HPPA <span class="o">=</span> /usr/bin/passwd <span class="o">[</span>A-Za-z]<span class="k">*</span>, <span class="o">!</span>/usr/bin/passwd root
+
+<span class="c"># bob may run anything on the sparc and sgi machines as any user</span>
+<span class="c"># listed in the Runas_Alias "OP" (ie: root and operator)</span>
+bob		SPARC <span class="o">=</span> <span class="o">(</span>OP<span class="o">)</span> ALL : SGI <span class="o">=</span> <span class="o">(</span>OP<span class="o">)</span> ALL
+
+<span class="c"># jim may run anything on machines in the biglab netgroup</span>
+jim		+biglab <span class="o">=</span> ALL
+
+<span class="c"># users in the secretaries netgroup need to help manage the printers</span>
+<span class="c"># as well as add and remove users</span>
++secretaries	ALL <span class="o">=</span> PRINTING, /usr/bin/adduser, /usr/bin/rmuser
+
+<span class="c"># fred can run commands as oracle or sybase without a password</span>
+fred		ALL <span class="o">=</span> <span class="o">(</span>DB<span class="o">)</span> NOPASSWD: ALL
+
+<span class="c"># on the alphas, john may su to anyone but root and flags are not allowed</span>
+john		ALPHA <span class="o">=</span> /usr/bin/su <span class="o">[!</span>-]<span class="k">*</span>, <span class="o">!</span>/usr/bin/su <span class="k">*</span>root<span class="k">*</span>
+
+<span class="c"># jen can run anything on all machines except the ones</span>
+<span class="c"># in the "SERVERS" Host_Alias</span>
+jen		ALL, <span class="o">!</span>SERVERS <span class="o">=</span> ALL
+
+<span class="c"># jill can run any commands in the directory /usr/bin/, except for</span>
+<span class="c"># those in the SU and SHELLS aliases.</span>
+jill		SERVERS <span class="o">=</span> /usr/bin/, <span class="o">!</span>SU, <span class="o">!</span>SHELLS
+
+<span class="c"># steve can run any command in the directory /usr/local/op_commands/</span>
+<span class="c"># as user operator.</span>
+steve		CSNETS <span class="o">=</span> <span class="o">(</span>operator<span class="o">)</span> /usr/local/op_commands/
+
+<span class="c"># matt needs to be able to kill things on his workstation when</span>
+<span class="c"># they get hung.</span>
+matt		valkyrie <span class="o">=</span> KILL
+
+<span class="c"># users in the WEBMASTERS User_Alias (will, wendy, and wim)</span>
+<span class="c"># may run any command as user www (which owns the web pages)</span>
+<span class="c"># or simply su to www.</span>
+WEBMASTERS	www <span class="o">=</span> <span class="o">(</span>www<span class="o">)</span> ALL, <span class="o">(</span>root<span class="o">)</span> /usr/bin/su www
+
+<span class="c"># anyone can mount/unmount a cd-rom on the machines in the CDROM alias</span>
+ALL		CDROM <span class="o">=</span> NOPASSWD: /sbin/umount /CDROM,<span class="se">\</span>
+		/sbin/mount <span class="nt">-o</span> nosuid<span class="se">\,</span>nodev /dev/cd0a /CDROM
+</code></pre></div></div>
+
+:ET

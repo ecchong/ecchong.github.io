@@ -1,0 +1,24 @@
+I"ù
+<h3 id="replacing-multiple-lines-in-file">Replacing multiple lines in file</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Set some kernel parameters</span>
+  <span class="na">lineinfile</span><span class="pi">:</span>
+    <span class="na">dest</span><span class="pi">:</span> <span class="s">/etc/sysctl.conf</span>
+    <span class="na">regexp</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+    <span class="na">line</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+  <span class="na">with_items</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="pi">{</span> <span class="nv">regexp</span><span class="pi">:</span> <span class="s1">'</span><span class="s">^kernel.shmall'</span><span class="pi">,</span> <span class="nv">line</span><span class="pi">:</span> <span class="s1">'</span><span class="s">kernel.shmall</span><span class="nv"> </span><span class="s">=</span><span class="nv"> </span><span class="s">2097152'</span> <span class="pi">}</span>
+    <span class="pi">-</span> <span class="pi">{</span> <span class="nv">regexp</span><span class="pi">:</span> <span class="s1">'</span><span class="s">^kernel.shmmax'</span><span class="pi">,</span> <span class="nv">line</span><span class="pi">:</span> <span class="s1">'</span><span class="s">kernel.shmmax</span><span class="nv"> </span><span class="s">=</span><span class="nv"> </span><span class="s">134217728'</span> <span class="pi">}</span>
+    <span class="pi">-</span> <span class="pi">{</span> <span class="nv">regexp</span><span class="pi">:</span> <span class="s1">'</span><span class="s">^fs.file-max'</span><span class="pi">,</span> <span class="nv">line</span><span class="pi">:</span> <span class="s1">'</span><span class="s">fs.file-max</span><span class="nv"> </span><span class="s">=</span><span class="nv"> </span><span class="s">65536'</span> <span class="pi">}</span>
+</code></pre></div></div>
+
+<h3 id="replacing-a-block-of-text">Replacing a block of text</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="na">blockinfile</span><span class="pi">:</span>
+      <span class="na">path</span><span class="pi">:</span> <span class="s">inventory.test</span>
+      <span class="na">block</span><span class="pi">:</span> <span class="pi">|</span>
+         <span class="s">[isolated_group_]</span>
+         
+         <span class="s">[isolated_group_:vars]</span>
+         <span class="s">controller=tower</span>
+      <span class="na">state</span><span class="pi">:</span> <span class="s">present</span>
+</code></pre></div></div>
+:ET

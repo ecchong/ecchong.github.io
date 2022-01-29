@@ -1,0 +1,14 @@
+I"‡<h3 id="how-to-use-user-data-to-setup-winrm-on-aws">How to use user data to setup WinRM on AWS</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>user_data: |
+  &lt;powershell&gt;
+  <span class="nv">$url</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"</span>
+  <span class="nv">$file</span> <span class="o">=</span> <span class="s2">"</span><span class="nv">$env</span><span class="s2">:temp</span><span class="se">\C</span><span class="s2">onfigureRemotingForAnsible.ps1"</span>
+  <span class="o">(</span>New-Object <span class="nt">-TypeName</span> System.Net.WebClient<span class="o">)</span>.DownloadFile<span class="o">(</span><span class="nv">$url</span>, <span class="nv">$file</span><span class="o">)</span>
+  powershell.exe <span class="nt">-ExecutionPolicy</span> ByPass <span class="nt">-File</span> <span class="nv">$file</span> <span class="nt">-EnableCredSSP</span>
+  <span class="nv">$Password</span> <span class="o">=</span> ConvertTo-SecureString <span class="s2">"Password"</span> <span class="nt">-AsPlainText</span> <span class="nt">-Force</span>
+  New-LocalUser <span class="s2">"local_ansible"</span> <span class="nt">-Password</span> <span class="nv">$Password</span> <span class="nt">-FullName</span> <span class="s2">"Ansible User"</span> <span class="nt">-Description</span> <span class="s2">"For running Ansible"</span>
+  Add-LocalGroupMember <span class="nt">-Group</span> Administrators <span class="nt">-Member</span> local_ansible
+  &lt;/powershell&gt;
+</code></pre></div></div>
+:ET

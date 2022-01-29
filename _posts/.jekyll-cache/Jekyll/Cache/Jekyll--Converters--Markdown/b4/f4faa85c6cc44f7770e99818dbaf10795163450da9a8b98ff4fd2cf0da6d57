@@ -1,0 +1,73 @@
+I"v<h1 id="how-to-deploy-aap-21-on-openshift-from-cli-without-cluster-admin-privileges-kind-of">How to deploy AAP 2.1 on OpenShift from CLI without Cluster Admin privileges (kind of)</h1>
+
+<ul>
+  <li>Ask Cluster Admin to assign the following permission to access the OperatorHub
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>oc create clusterrolebinding user-aggregate-olm-view --clusterrole=aggregate-olm-view --user=myname
+</code></pre></div>    </div>
+  </li>
+  <li>Cluster Admin also need to create an OperatorGroup for your namespace. Create operator-group.yaml</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apiVersion: operators.coreos.com/v1alpha2
+kind: OperatorGroup
+metadata:
+  name: my-user-operatorgroup
+  namespace: myspace
+spec:
+  targetNamespaces:
+  - myspace
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>oc create -n myspace -f operator-group.yaml
+</code></pre></div></div>
+
+<ul>
+  <li>As admin of your namespace, create a subscription for AAP 2.1 operator.  Create file <code class="language-plaintext highlighter-rouge">subscription.yml</code></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: ansible-automation-platform
+  namespace: ansible-automation-platform
+spec:
+  channel: 'stable-2.1'
+  installPlanApproval: Automatic
+  name: ansible-automation-platform-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>oc create -f subscription.yml
+</code></pre></div></div>
+
+<ul>
+  <li>As admin of your namespace, create a automation controller.  Create file <code class="language-plaintext highlighter-rouge">automation-controller.yaml</code></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+apiVersion: automationcontroller.ansible.com/v1beta1
+kind: AutomationController
+metadata:
+  name: example
+  namespace: ansible-automation-platform
+spec:
+  create_preload_data: true
+  route_tls_termination_mechanism: Edge
+  garbage_collect_secrets: false
+  loadbalancer_port: 80
+  image_pull_policy: IfNotPresent
+  projects_storage_size: 8Gi
+  task_privileged: false
+  projects_storage_access_mode: ReadWriteMany
+  projects_persistence: false
+  replicas: 1
+  admin_user: admin
+  loadbalancer_protocol: http
+  nodeport_port: 30080
+</code></pre></div></div>
+
+<h2 id="references">References</h2>
+<p><a href="https://access.redhat.com/articles/5182341">Configure RBAC in Different Stages so End-users can Interact with OperatorHub in the Console</a></p>
+:ET

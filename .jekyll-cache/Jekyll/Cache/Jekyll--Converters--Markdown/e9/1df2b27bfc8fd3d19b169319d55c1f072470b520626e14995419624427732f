@@ -1,0 +1,11 @@
+I"ú<h3 id="it-is-just-magic">It is just magic</h3>
+<ul>
+  <li>role_name : current role name</li>
+  <li>role_names : list of roles in current play</li>
+  <li>groups : list of groups and their hosts</li>
+  <li>inventory_hostname : name of current host</li>
+  <li>play_hosts: list of hosts in current play</li>
+</ul>
+
+<p>More <a href="https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html">https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html</a></p>
+:ET

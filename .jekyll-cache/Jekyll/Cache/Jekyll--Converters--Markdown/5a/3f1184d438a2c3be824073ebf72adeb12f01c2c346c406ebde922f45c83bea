@@ -1,0 +1,23 @@
+I"µ<h2 id="how-to-create-a-host-in-tower-via-rest-api-call">How to create a host in Tower via REST API call?</h2>
+
+<p>First we need to get the inventory id.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-k</span> <span class="nt">-X</span> GET <span class="nt">-u</span> admin:ar2iis! https://dvnv-rhans01.dev.iisl.com/api/v2/inventories/
+</code></pre></div></div>
+<p>To create a host under inventory ID 15.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST <span class="se">\</span>
+  https://&lt;Tower <span class="nb">hostname</span><span class="o">&gt;</span>/api/v2/hosts/ <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s1">'authorization: Basic XXXXXXXXXXXXXXXXâ€™ \
+  -H '</span>cache-control: no-cache<span class="s1">' \
+  -H '</span>content-type: application/json<span class="s1">' \
+  -d '</span><span class="o">{</span>
+    <span class="s2">"name"</span>: <span class="s2">"test_host"</span>,
+    <span class="s2">"description"</span>: <span class="s2">"from REST API"</span>,
+    <span class="s2">"enabled"</span>: <span class="nb">true</span>,
+    <span class="s2">"inventory"</span>: <span class="s2">"15"</span>,
+    <span class="s2">"variables"</span>: <span class="s2">""</span>
+<span class="o">}</span><span class="s1">'
+</span></code></pre></div></div>
+
+:ET

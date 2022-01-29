@@ -1,0 +1,17 @@
+I"�<h3 id="how-to-enable-or-disable-a-host-during-import">How to enable or disable a host during import</h3>
+
+<p>We want to able to control the available of a managed host that is imported from dynamic inventory script.  Default behavior only allow disabling manually created host.  Host imported with dynamic inventory is always enabled.</p>
+
+<p>To change this behavior:</p>
+<ol>
+  <li>Create a .py file under /etc/tower/conf.d  For example, hostvar-enabler.py</li>
+  <li>Insert into the file the following:
+   SCM_ENABLED_VAR = ‘isenabled’
+   SCM_ENABLED_VALUE = ‘true’</li>
+  <li>Restart Tower host</li>
+</ol>
+
+<p>Now whenever a host is imported with variable ‘isenabled’: ‘true’ or without ‘isenabled’, it will be imported as enabled.  Anythingelse is set on variable ‘isenabled’, the host will be imported as disabled.  The variable name and value is arbitrary.</p>
+
+<p><a href="https://access.redhat.com/solutions/3387661">https://access.redhat.com/solutions/3387661</a></p>
+:ET

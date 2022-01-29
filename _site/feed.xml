@@ -1,0 +1,696 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2022-01-29T11:35:18-05:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Automate NYC!</title><subtitle>Snippet of IT stuff</subtitle><author><name>Eric Chong</name></author><entry><title type="html">How to setup a lab LDAP for AAP controller and hub</title><link href="http://localhost:4000/ansible/lab-ldap-for-aap/" rel="alternate" type="text/html" title="How to setup a lab LDAP for AAP controller and hub" /><published>2022-01-17T00:00:00-05:00</published><updated>2022-01-17T00:00:00-05:00</updated><id>http://localhost:4000/ansible/lab-ldap-for-aap</id><content type="html" xml:base="http://localhost:4000/ansible/lab-ldap-for-aap/">&lt;h1 id=&quot;automation-hub-ldap-and-sso&quot;&gt;Automation Hub, LDAP and SSO&lt;/h1&gt;
+&lt;p&gt;Latest version of Automation Hub does not has built-in LDAP support.  Instead it relies on Red Hat SSO to provide integration with the LDAP authentication.  Fortunately the AAP installation playbooks will assist setting up the SSO application on a separate VM with Automation Hub.&lt;/p&gt;
+
+&lt;h2 id=&quot;openldap&quot;&gt;Openldap&lt;/h2&gt;
+&lt;p&gt;First we will need a simple LDAP server.  We will be using Osixia OpenLDAP container image.&lt;/p&gt;
+
+&lt;p&gt;Create a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Containerfile&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-docker highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; docker.io/osixia/openldap:latest&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;LABEL&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; maintainer=&quot;echong@redhat.com&quot;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; LDAP_ORGANISATION=&quot;Lab&quot; \&lt;/span&gt;
+    LDAP_DOMAIN=&quot;automate.nyc&quot;
+
+&lt;span class=&quot;k&quot;&gt;COPY&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; bootstrap.ldif /container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Create the bootstrap.ldif to preload the image with OUs, users and groups:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-ldif&quot;&gt;dn: ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=automate,dc=nyc
+changetype: add
+objectClass: organizationalUnit
+ou: groups
+
+dn: uid=bbanner,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: The Hulk
+givenName: Bruce
+sn: Banner
+cn: Bruce Banner
+uid: bbanner
+mail: bbanner@automate.nyc
+userpassword: secret_password
+
+dn: uid=cbarton,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Hawkeye
+givenName: Clint
+sn: barton
+cn: Clint Barton
+uid: cbarton
+mail: cbarton@automate.nyc
+userpassword: secret_password
+
+... &amp;lt;-- skipping the rest of the super heroes here
+&lt;/code&gt;&lt;/pre&gt;
+&lt;!--
+dn: uid=slang,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Ant Man
+givenName: Scott
+sn: Lang
+cn: Scott Lang
+uid: slang
+mail: slang@automate.nyc
+userpassword: secret_password
+
+dn: uid=tstark,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Iron Man
+givenName: Tony
+sn: Stark
+cn: Tony Stark
+uid: tstark
+mail: tstart@automate.nyc
+userpassword: secret_password
+
+dn: uid=cdanvers,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Captain Marvel
+givenName: Carol
+sn: Danvers
+cn: Carol Davers
+uid: cdanvers
+mail: cdanvers@automate.nyc
+userpassword: secret_password
+
+dn: uid=echong,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Eric Chong the admin
+givenName: Eric
+sn: Chong
+cn: Eric Chong
+uid: echong
+mail: echong@redhat.com
+userpassword: secret_password
+--&gt;
+&lt;pre&gt;&lt;code class=&quot;language-ldif&quot;&gt;dn: cn=admins,ou=groups,dc=automate,dc=nyc
+changetype: add
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: admins
+uniqueMember: uid=bbanner,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=echong,ou=people,dc=automate,dc=nyc
+
+dn: cn=operators,ou=groups,dc=automate,dc=nyc
+changetype: add
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: operators
+uniqueMember: uid=cbarton,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=tstark,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=cdanvers,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=slang,ou=people,dc=automate,dc=nyc
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Build the image with the LDAP data:&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;podman build &lt;span class=&quot;nt&quot;&gt;--tag&lt;/span&gt; localhost/openldap:withdata &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Start the container as root, since we are using privilege port 389:&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;podman run &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;--name&lt;/span&gt; openldap &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;--env&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;LDAP_ORGANISATION&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Lab&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;--env&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;LDAP_DOMAIN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;automate.nyc&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;--env&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;LDAP_ADMIN_PASSWORD&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;test1234&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; 389:389 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;--detach&lt;/span&gt; localhost/openldap:withdata
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Bonus.  We can also start the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;phpldapadmin&lt;/code&gt; GUI in a second container:&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;podman run &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; 8090:80 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;--name&lt;/span&gt; phpldapadmin &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;--env&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;PHPLDAPADMIN_LDAP_HOSTS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;192.168.1.209 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;--env&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;PHPLDAPADMIN_HTTPS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'false'&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;--detach&lt;/span&gt; docker.io/osixia/phpldapadmin:0.9.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Test the connection from AAP servers using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ldapsearch&lt;/code&gt; command:&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ldapsearch &lt;span class=&quot;nt&quot;&gt;-x&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-v&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-b&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'dc=automate,dc=nyc'&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; ldap://192.168.1.209:389 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;-D&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'cn=admin,dc=automate,dc=nyc'&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-w&lt;/span&gt; test1234 &lt;span class=&quot;nt&quot;&gt;-LLL&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;automation-hub-and-sso-servers&quot;&gt;Automation Hub and SSO servers&lt;/h2&gt;
+&lt;p&gt;Update the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;inventory&lt;/code&gt; file with additional information for setting SSO server.&lt;/p&gt;
+&lt;div class=&quot;language-ini highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[sso]&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;aap-sso.lab.automate.nyc&lt;/span&gt;
+
+&lt;span class=&quot;nn&quot;&gt;[all:vars]&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;sso_keystore_password:&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;secret_password&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;sso_console_admin_password:&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;secret_password&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now run AAP installation script &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setup.sh&lt;/code&gt; to install SSO on the assigned server and setup the Automation Hub to use the SSO server for authentication.&lt;/p&gt;
+
+&lt;p&gt;See &lt;a href=&quot;https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.1/html/installing_and_configuring_central_authentication_for_the_ansible_automation_platform&quot;&gt;Installing and Configuring Central Authentication for the Ansible Automation Platform&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;My final SSO setting: &lt;img src=&quot;/assets/images/2022/2022-01-17-sso-settings.png&quot; alt=&quot;SSO Setting&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;My user role mapping setting: &lt;img src=&quot;/assets/images/2022/2022-01-17-sso-user-role-mapping.png&quot; alt=&quot;User Role Mapping&quot; /&gt;&lt;/p&gt;</content><author><name>Eric Chong</name></author><category term="Ansible" /><category term="ansible" /><category term="aap" /><category term="docker" /><category term="podman" /><category term="container" /><category term="Tower" /><category term="Automation Hub" /><category term="LDAP" /><category term="OpenLDAP" /><summary type="html">Automation Hub, LDAP and SSO Latest version of Automation Hub does not has built-in LDAP support. Instead it relies on Red Hat SSO to provide integration with the LDAP authentication. Fortunately the AAP installation playbooks will assist setting up the SSO application on a separate VM with Automation Hub.</summary></entry><entry><title type="html">How to create a new execution environment</title><link href="http://localhost:4000/ansible/create-new-ee/" rel="alternate" type="text/html" title="How to create a new execution environment" /><published>2022-01-09T00:00:00-05:00</published><updated>2022-01-09T00:00:00-05:00</updated><id>http://localhost:4000/ansible/create-new-ee</id><content type="html" xml:base="http://localhost:4000/ansible/create-new-ee/">&lt;h1 id=&quot;build-a-new-ee-image&quot;&gt;Build a new EE image&lt;/h1&gt;
+&lt;p&gt;We would like to use a third part collection, in this case &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;community.efficientip&lt;/code&gt;, in our playbooks. The collection is currently in the Automation Hub server and it also requires a Python module, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SOLIDserverRest&lt;/code&gt;, which is available via pip.  Since this Python module is no available in the standard execution environment, we will need to create a new EE image using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ansible-builder&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Inside the build directory, create a file called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;execution-environment.yml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;build_arg_defaults&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;EE_BASE_IMAGE&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;aap-hub1.lab.automate.nyc/ee-supported-rhel8'&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;dependencies&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;python&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;requirements-efficientip.txt&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;galaxy&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;requirements.yml&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;ansible_config&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;ansible.cfg'&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;additional_build_steps&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;prepend&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;RUN pip3 install --upgrade pip wheel setuptools&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;We are going to use the standard EE image &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ee-supported-rhel8&lt;/code&gt; from my Automation Hub server &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;aap-hub1.lab.automate.nyc&lt;/code&gt; as base image.  The dependency files identify required Python modules and collections.  In our case, the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;requirement-efficientip.txt&lt;/code&gt; contains the Python module name in pip format:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;SOLIDserverRest
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;requirements.yml&lt;/code&gt; file contains the list of required collections:&lt;/p&gt;
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;collections&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;community.crypto&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;community.efficientip&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Since we will be pulling collections from our Automation Hub server, we will need to configure the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ansible.cfg&lt;/code&gt; file with proper credentials:&lt;/p&gt;
+&lt;div class=&quot;language-ini highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[galaxy]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;server_list&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;automation_hub, rh-certified_repo, published_repo, community_repo&lt;/span&gt;
+
+&lt;span class=&quot;nn&quot;&gt;[galaxy_server.automation_hub]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;https://aap-hub1.lab.automate.nyc/api/galaxy/&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;token&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;lt;token string&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;nn&quot;&gt;[galaxy_server.rh-certified_repo]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;https://aap-hub1.lab.automate.nyc/api/galaxy/content/rh-certified/&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;token&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;lt;token string&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;nn&quot;&gt;[galaxy_server.published_repo]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;https://aap-hub1.lab.automate.nyc/api/galaxy/content/published/&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;token&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;lt;token string&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;nn&quot;&gt;[galaxy_server.community_repo]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;https://aap-hub1.lab.automate.nyc/api/galaxy/content/community/&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;token&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;lt;token string&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;To create a new image, run command:&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ansible-builder build &lt;span class=&quot;nt&quot;&gt;--tag&lt;/span&gt; aap-hub1.lab.automate.nyc/efficientip_ee &lt;span class=&quot;nt&quot;&gt;--container-runtime&lt;/span&gt; docker
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;The image will be tagged with our Automation Hub server name, so it can be pushed to our server once it is created.  Default &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ansible-builder&lt;/code&gt; command will use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;podman&lt;/code&gt;, but in this case we will be using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker&lt;/code&gt; while running on MacOS.&lt;/p&gt;
+
+&lt;p&gt;After the build is done, we can verify the new image with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ansible-navigator&lt;/code&gt; command.  To list the installed collections:&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ansible-navigator collections &lt;span class=&quot;nt&quot;&gt;--ce&lt;/span&gt; docker  &lt;span class=&quot;nt&quot;&gt;--eei&lt;/span&gt; aap-hub1.lab.automate.nyc/efficientip_ee
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Again, we are running on MacOS, so we will need to specify to use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker&lt;/code&gt; as our container engine.&lt;/p&gt;
+
+&lt;p&gt;Publish the EE image with the same method as to any container registry:&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;docker login &lt;span class=&quot;nt&quot;&gt;--username&lt;/span&gt; admin aap-hub1.lab.automate.nyc
+Password: 
+Login Succeeded
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;docker push aap-hub1.lab.automate.nyc/efficientip_ee
+Using default tag: latest
+The push refers to repository &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;aap-hub1.lab.automate.nyc/efficientip_ee]
+206894a40f6c: Layer already exists 
+2e257b8b9924: Layer already exists 
+d1803f81822a: Layer already exists 
+9b2e1ea8a49b: Layer already exists 
+4fe50fe3a3b7: Layer already exists 
+c02d758c2215: Layer already exists 
+a65a1b01a4d2: Layer already exists 
+af092941766c: Layer already exists 
+latest: digest: sha256:8deba4dad1c74013ab02c41ce5f87f1353b4e85841ae88eacafdc8d9aed9b4fe size: 2009
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.ansible.com/blog/introduction-to-ansible-builder&quot;&gt;Introduction to Ansible Builder&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.ansible.com/blog/automating-execution-environment-image-builds-with-github-actions&quot;&gt;Automating execution environment image builds with GitHub Actions&lt;/a&gt;&lt;/p&gt;</content><author><name>Eric Chong</name></author><category term="Ansible" /><category term="ansible" /><category term="aap" /><category term="ee" /><category term="execution environment" /><category term="docker" /><category term="podman" /><category term="container" /><summary type="html">Build a new EE image We would like to use a third part collection, in this case community.efficientip, in our playbooks. The collection is currently in the Automation Hub server and it also requires a Python module, SOLIDserverRest, which is available via pip. Since this Python module is no available in the standard execution environment, we will need to create a new EE image using ansible-builder</summary></entry><entry><title type="html">How to deploy AAP 2.1 on OpenShift from CLI</title><link href="http://localhost:4000/ansible/deploy-aap-openshift-cli/" rel="alternate" type="text/html" title="How to deploy AAP 2.1 on OpenShift from CLI" /><published>2021-12-07T00:00:00-05:00</published><updated>2022-01-28T00:00:00-05:00</updated><id>http://localhost:4000/ansible/deploy-aap-openshift-cli</id><content type="html" xml:base="http://localhost:4000/ansible/deploy-aap-openshift-cli/">&lt;h1 id=&quot;how-to-deploy-aap-21-on-openshift-from-cli-without-cluster-admin-privileges-kind-of&quot;&gt;How to deploy AAP 2.1 on OpenShift from CLI without Cluster Admin privileges (kind of)&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Ask Cluster Admin to assign the following permission to access the OperatorHub&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;oc create clusterrolebinding user-aggregate-olm-view --clusterrole=aggregate-olm-view --user=myname
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Cluster Admin also need to create an OperatorGroup for your namespace. Create operator-group.yaml&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;apiVersion&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;operators.coreos.com/v1alpha2&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;kind&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;OperatorGroup&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;metadata&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;my-user-operatorgroup&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;namespace&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;myspace&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;spec&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;targetNamespaces&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;myspace&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;oc create &lt;span class=&quot;nt&quot;&gt;-n&lt;/span&gt; myspace &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; operator-group.yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;As admin of your namespace, create a subscription for AAP 2.1 operator.  Create file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;subscription.yml&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;apiVersion&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;operators.coreos.com/v1alpha1&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;kind&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Subscription&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;metadata&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ansible-automation-platform&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;namespace&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;myspace&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;spec&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;channel&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;stable-2.1'&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;installPlanApproval&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Automatic&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ansible-automation-platform-operator&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;source&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;redhat-operators&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;sourceNamespace&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;openshift-marketplace&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;oc create &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; subscription.yml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;As admin of your namespace, create a automation controller.  Create file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;automation-controller.yaml&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;apiVersion&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;automationcontroller.ansible.com/v1beta1&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;kind&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;AutomationController&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;metadata&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;aap-controller&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;namespace&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;myspace&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;spec&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;create_preload_data&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;route_tls_termination_mechanism&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Edge&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;garbage_collect_secrets&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;false&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;loadbalancer_port&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;80&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;image_pull_policy&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;IfNotPresent&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;projects_storage_size&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;8Gi&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;task_privileged&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;false&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;projects_storage_access_mode&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ReadWriteMany&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;projects_persistence&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;false&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;replicas&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;admin_user&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;admin&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;loadbalancer_protocol&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;http&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;nodeport_port&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;30080&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://access.redhat.com/articles/5182341&quot;&gt;Configure RBAC in Different Stages so End-users can Interact with OperatorHub in the Console&lt;/a&gt;&lt;/p&gt;</content><author><name>Eric Chong</name></author><category term="Ansible" /><category term="openshift" /><category term="operator" /><category term="ansible" /><category term="aap" /><summary type="html">How to deploy AAP 2.1 on OpenShift from CLI without Cluster Admin privileges (kind of)</summary></entry><entry><title type="html">How to setup RHEL 8 to run as a kiosk</title><link href="http://localhost:4000/rhel/rhel-kisok/" rel="alternate" type="text/html" title="How to setup RHEL 8 to run as a kiosk" /><published>2021-11-24T00:00:00-05:00</published><updated>2021-11-24T00:00:00-05:00</updated><id>http://localhost:4000/rhel/rhel-kisok</id><content type="html" xml:base="http://localhost:4000/rhel/rhel-kisok/">&lt;h1 id=&quot;how-to-setup-rhel-8-to-run-as-a-kiosk&quot;&gt;How to setup RHEL 8 to run as a kiosk&lt;/h1&gt;
+
+&lt;p&gt;While investigate how to setup a PC as a kiosk, I found this blog post describing this RHEL 8 feature.  It basically run a minimum Gnome desktop, autologin as the kiosk user and launch the kiosk app.  It also disabled the Crtl + Alt + F# key combination to switch to another virtual terminal.&lt;/p&gt;
+
+&lt;p&gt;To summarize:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Create a dedicated kiosk user
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;useradd kioskuser
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Install the requred packages
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;yum install -y gnome-session-kiosk-session gdm firefox
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Make sure the system start up graphical target
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl set-default graphical.target
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Setup to autologin as the dedicated user.  Edit &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/gdm/custom.conf&lt;/code&gt;.  Will also need to make sure Wayland is not running.
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[daemon]
+AutomaticLoginEnable=True
+AutomaticLogin=kioskuser
+WaylandEnable=false
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Setup the user’s session to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;com.redhat.Kiosk&lt;/code&gt;.  Edit &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/lib/AccountService/users/kioskuser&lt;/code&gt;.
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[User]
+Session=com.redhat.Kiosk
+SystemAccount=false
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Suppress initial setup dialog box.  Edit &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/xdg/autostart/gnome-initial-setup-first-login.desktop&lt;/code&gt;.
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;line: &quot;X-GNOME-Autostart-enabled=false&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Create an infinite loop script to run the kiosk app by creating file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~kioskuser/.local/bin/redhat-kiosk&lt;/code&gt;.  In this example, bring up the world clock on firefox.
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/sh
+while true; do
+    firefox -kiosk https://time.gov
+done
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;Make sure the script is executable&lt;/p&gt;
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;chmod +x ~kioskuser/.local/bin/redhat-kiosk
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.redhat.com/en/blog/using-rhels-lightweight-kiosk-mode-edge-deployments&quot;&gt;Using RHEL’s Lightweight Kiosk Mode in Edge Deployments&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://access.redhat.com/solutions/4243461&quot;&gt;How to enable kiosk mode in Red Hat Enterprise Linux 7/8?&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/using_the_desktop_environment_in_rhel_8/assembly_restricting-the-session-to-a-single-application_using-the-desktop-environment-in-rhel-8&quot;&gt;Single-application mode&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://help.gnome.org/admin/system-admin-guide/stable/lockdown-single-app-mode.html.en&quot;&gt;Configure single-application mode&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/using_the_desktop_environment_in_rhel_8/index#setting-the-org-gnome-desktop-lockdown-disable-key&quot;&gt;Setting the org.gnome.desktop.lockdown.disable-command-line Key&lt;/a&gt;&lt;/p&gt;</content><author><name>Eric Chong</name></author><category term="RHEL" /><category term="rhel" /><category term="kiosk" /><summary type="html">How to setup RHEL 8 to run as a kiosk</summary></entry><entry><title type="html">How to filter hosts on Tower inventory import</title><link href="http://localhost:4000/ansible/inventory-filter/" rel="alternate" type="text/html" title="How to filter hosts on Tower inventory import" /><published>2021-07-01T00:00:00-04:00</published><updated>2021-07-01T00:00:00-04:00</updated><id>http://localhost:4000/ansible/inventory-filter</id><content type="html" xml:base="http://localhost:4000/ansible/inventory-filter/">&lt;h1 id=&quot;how-to-filter-hosts-on-tower-inventory-import&quot;&gt;How to filter hosts on Tower inventory import&lt;/h1&gt;
+&lt;p&gt;Some examples using filters when importing inventory from vCenter.  See the &lt;a href=&quot;https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_vm_inventory_inventory.html&quot;&gt;plugin doc&lt;/a&gt; for details.&lt;/p&gt;
+
+&lt;h2 id=&quot;scenario-1&quot;&gt;Scenario 1&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;Import VMs in vCenter only with tag “import_to_inventory” under the categories “Test” and “Tower”&lt;/li&gt;
+  &lt;li&gt;Put VMs into group name of the corresponding tag category&lt;/li&gt;
+  &lt;li&gt;Import only the VMs that are powered on&lt;/li&gt;
+  &lt;li&gt;Import VMs with the configured name (VMs are created without duplicate name in vCenter)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;hostnames&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;config.name&quot;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;groups&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;Tower&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Tower'&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;in&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;categories&quot;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;Test&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Test'&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;in&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;categories&quot;&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;with_tags&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;yes&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;filters&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;summary.runtime.powerState == &quot;poweredOn&quot;&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'import_to_inventory'&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;in&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;tags&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Note:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Check host vars of imported host to see what variables are available for filtering&lt;/li&gt;
+  &lt;li&gt;If using “properties” to selective import host vars, it must include the one used in filters&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;scenario-2&quot;&gt;Scenario 2&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;Import VMs under the “management” folder for datacenter “LAB”&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;hostnames&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;config.name&quot;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;with_tags&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;yes&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;resources&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;datacenter&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;LAB&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;resources&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;folder&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;management&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Eric Chong</name></author><category term="Ansible" /><category term="ansible" /><category term="tower" /><category term="vcenter" /><category term="vmware" /><summary type="html">How to filter hosts on Tower inventory import Some examples using filters when importing inventory from vCenter. See the plugin doc for details.</summary></entry><entry><title type="html">Ansible Variables Precedence Gotcha</title><link href="http://localhost:4000/ansible/ansible-precedence/" rel="alternate" type="text/html" title="Ansible Variables Precedence Gotcha" /><published>2021-03-14T00:00:00-05:00</published><updated>2021-03-14T00:00:00-05:00</updated><id>http://localhost:4000/ansible/ansible-precedence</id><content type="html" xml:base="http://localhost:4000/ansible/ansible-precedence/">&lt;p&gt;I recently got tripped by Ansible variables precedence.  We are familiar with the &lt;a href=&quot;https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#:~:text=Ansible%20does%20apply%20variable%20precedence,in%20role%2Fdefaults%2Fmain.&quot;&gt;precedence concept&lt;/a&gt;. Sometime in a complex playbooks, it help to remember how variables are loaded.&lt;/p&gt;
+
+&lt;p&gt;In recent project, a playbook is used to deploy configuration to a brand new Cisco switch setup with a temporary password.  The real password for the whole environment is stored in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;prod.yaml&lt;/code&gt; file and loaded using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;include_vars&lt;/code&gt; early in the playbook.  In order to connect to the new switch, I use set_fact to set the temporary credential, and expected I can reconnect to the switch with the production password once the configuration is loaded and rebooted.&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Load production credential for the environment&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;include_vars&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;prod.yaml&lt;/span&gt;
+  &lt;span class=&quot;s&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Set a temporary password to connect to the new switch&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;set_fact&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ansible_password&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;temp_password&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ansible_become_password&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;temp_enable_password&lt;/span&gt;
+  &lt;span class=&quot;s&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;The configuration tasks and reboot the new switch&lt;/span&gt;
+  &lt;span class=&quot;s&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Try to reset the production credential and reconnect to the new switch&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;include_vars&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;prod.yaml&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Do more configuration with production credential&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;ios_command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;commands&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;show version&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It turns out set_fact has higher precendence than include_vars.  The temporary credential is still being used at the last task.  The only way to overwrite that is with another &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;set_fact&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Try to reset the production credential and reconnect to the new switch&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;include_vars&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;prod.yaml&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;prod_vars&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Reset the passwords&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;set_fact&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ansible_password&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;prod_vars.ansible_password&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ansible_enable_password&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;prod_vars.ansible_enable_password&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Eric Chong</name></author><category term="Ansible" /><category term="ansible" /><category term="linux" /><summary type="html">I recently got tripped by Ansible variables precedence. We are familiar with the precedence concept. Sometime in a complex playbooks, it help to remember how variables are loaded.</summary></entry><entry><title type="html">Gettinng libselinux-python error in virtual environment or SCL</title><link href="http://localhost:4000/ansible/ansible-libselinux-error/" rel="alternate" type="text/html" title="Gettinng libselinux-python error in virtual environment or SCL" /><published>2021-02-03T00:00:00-05:00</published><updated>2021-02-03T00:00:00-05:00</updated><id>http://localhost:4000/ansible/ansible-libselinux-error</id><content type="html" xml:base="http://localhost:4000/ansible/ansible-libselinux-error/">&lt;p&gt;Getting this error when running Ansible template task with Python3 in virtual environment or SCL&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;TASK &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;template] &lt;span class=&quot;k&quot;&gt;**********************************************************************************************************************************************************&lt;/span&gt;
+fatal: &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;localhost]: FAILED! &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;changed&quot;&lt;/span&gt;: &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;checksum&quot;&lt;/span&gt;: &lt;span class=&quot;s2&quot;&gt;&quot;09908cdcefd9544ab2de069d1a9e3d31a15220db&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;msg&quot;&lt;/span&gt;: &lt;span class=&quot;s2&quot;&gt;&quot;Aborting, target uses selinux but python bindings (libselinux-python) aren't installed!&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;TASK &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;template] &lt;span class=&quot;k&quot;&gt;**********************************************************************************************************************************************************&lt;/span&gt;
+fatal: &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;localhost]: FAILED! &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;changed&quot;&lt;/span&gt;: &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;checksum&quot;&lt;/span&gt;: &lt;span class=&quot;s2&quot;&gt;&quot;09908cdcefd9544ab2de069d1a9e3d31a15220db&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;msg&quot;&lt;/span&gt;: &lt;span class=&quot;s2&quot;&gt;&quot;Aborting, target uses selinux but python bindings (libselinux-python) aren't installed!&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The libselinux-python3 rpm is already installed, but not in the right location.  Copy them to the proper virtual environment of SCL directory.&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;cp&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; /usr/lib64/python3.6/site-packages/selinux /opt/rh/rh-python36/root/usr/lib64/python3.6/site-packages
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Eric Chong</name></author><category term="Ansible" /><category term="ansible" /><category term="linux" /><category term="selinux" /><summary type="html">Getting this error when running Ansible template task with Python3 in virtual environment or SCL</summary></entry><entry><title type="html">Sudo Samples</title><link href="http://localhost:4000/linux/sudo_samples/" rel="alternate" type="text/html" title="Sudo Samples" /><published>2021-01-20T00:00:00-05:00</published><updated>2021-01-20T00:00:00-05:00</updated><id>http://localhost:4000/linux/sudo_samples</id><content type="html" xml:base="http://localhost:4000/linux/sudo_samples/">&lt;h2 id=&quot;sudoer-samples&quot;&gt;Sudoer samples&lt;/h2&gt;
+&lt;p&gt;Sources&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.courtesan.com/sudo/sample.sudoers&quot;&gt;http://www.courtesan.com/sudo/sample.sudoers&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.sudo.ws/readme.html&quot;&gt;https://www.sudo.ws/readme.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Sample /etc/sudoers file.&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# This file MUST be edited with the 'visudo' command as root.&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# See the sudoers man page for the details on how to write a sudoers file.&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Override built-in defaults&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+Defaults		&lt;span class=&quot;nv&quot;&gt;syslog&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;auth
+Defaults&amp;gt;root		&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;set_logname
+Defaults:FULLTIMERS	&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;lecture
+Defaults:millert	&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;authenticate
+Defaults@SERVERS	log_year, &lt;span class=&quot;nv&quot;&gt;logfile&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/var/log/sudo.log
+Defaults!PAGERS		noexec
+
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# User alias specification&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+User_Alias	FULLTIMERS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; millert, mikef, dowdy
+User_Alias	PARTTIMERS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; bostley, jwfox, crawl
+User_Alias	WEBMASTERS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; will, wendy, wim
+
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Runas alias specification&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+Runas_Alias	OP &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; root, operator
+Runas_Alias	DB &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; oracle, sybase
+
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Host alias specification&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+Host_Alias	SPARC &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; bigtime, eclipse, moet, anchor:&lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+		SGI &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; grolsch, dandelion, black:&lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+		ALPHA &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; widget, thalamus, foobar:&lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+		HPPA &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; boa, nag, python
+Host_Alias	CUNETS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; 128.138.0.0/255.255.0.0
+Host_Alias	CSNETS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; 128.138.243.0, 128.138.204.0/24, 128.138.242.0
+Host_Alias	SERVERS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; master, mail, www, ns
+Host_Alias	CDROM &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; orion, perseus, hercules
+
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Cmnd alias specification&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+Cmnd_Alias	DUMPS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/sbin/dump, /usr/sbin/rdump, /usr/sbin/restore, &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+			/usr/sbin/rrestore, /usr/bin/mt, &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+			sha224:0GomF8mNN3wlDt1HD9XldjJ3SNgpFdbjO1+NsQ&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+			/home/operator/bin/start_backups
+Cmnd_Alias	KILL &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/bin/kill
+Cmnd_Alias	PRINTING &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/sbin/lpc, /usr/bin/lprm
+Cmnd_Alias	SHUTDOWN &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/sbin/shutdown
+Cmnd_Alias	HALT &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/sbin/halt
+Cmnd_Alias	REBOOT &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/sbin/reboot
+Cmnd_Alias	SHELLS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /sbin/sh, /usr/bin/sh, /usr/bin/csh, /usr/bin/ksh, &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+			 /usr/local/bin/tcsh, /usr/bin/rsh, &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+			 /usr/local/bin/zsh
+Cmnd_Alias	SU &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/bin/su
+Cmnd_Alias	VIPW &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/sbin/vipw, /usr/bin/passwd, /usr/bin/chsh, &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+		       /usr/bin/chfn
+Cmnd_Alias	PAGERS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/bin/more, /usr/bin/pg, /usr/bin/less
+
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# User specification&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# root and users in group wheel can run anything on any machine as any user&lt;/span&gt;
+root		ALL &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;ALL&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; ALL
+%wheel		ALL &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;ALL&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; ALL
+
+&lt;span class=&quot;c&quot;&gt;# full time sysadmins can run anything on any machine without a password&lt;/span&gt;
+FULLTIMERS	ALL &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; NOPASSWD: ALL
+
+&lt;span class=&quot;c&quot;&gt;# part time sysadmins may run anything but need a password&lt;/span&gt;
+PARTTIMERS	ALL &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; ALL
+
+&lt;span class=&quot;c&quot;&gt;# jack may run anything on machines in CSNETS&lt;/span&gt;
+jack		CSNETS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; ALL
+
+&lt;span class=&quot;c&quot;&gt;# lisa may run any command on any host in CUNETS (a class B network)&lt;/span&gt;
+lisa		CUNETS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; ALL
+
+&lt;span class=&quot;c&quot;&gt;# operator may run maintenance commands and anything in /usr/oper/bin/&lt;/span&gt;
+operator	ALL &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; DUMPS, KILL, SHUTDOWN, HALT, REBOOT, PRINTING,&lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+		sudoedit /etc/printcap, /usr/oper/bin/
+
+&lt;span class=&quot;c&quot;&gt;# joe may su only to operator&lt;/span&gt;
+joe		ALL &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/bin/su operator
+
+&lt;span class=&quot;c&quot;&gt;# pete may change passwords for anyone but root on the hp snakes&lt;/span&gt;
+pete		HPPA &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/bin/passwd &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;A-Za-z]&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;, &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;/usr/bin/passwd root
+
+&lt;span class=&quot;c&quot;&gt;# bob may run anything on the sparc and sgi machines as any user&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# listed in the Runas_Alias &quot;OP&quot; (ie: root and operator)&lt;/span&gt;
+bob		SPARC &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;OP&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; ALL : SGI &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;OP&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; ALL
+
+&lt;span class=&quot;c&quot;&gt;# jim may run anything on machines in the biglab netgroup&lt;/span&gt;
+jim		+biglab &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; ALL
+
+&lt;span class=&quot;c&quot;&gt;# users in the secretaries netgroup need to help manage the printers&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# as well as add and remove users&lt;/span&gt;
++secretaries	ALL &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; PRINTING, /usr/bin/adduser, /usr/bin/rmuser
+
+&lt;span class=&quot;c&quot;&gt;# fred can run commands as oracle or sybase without a password&lt;/span&gt;
+fred		ALL &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;DB&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; NOPASSWD: ALL
+
+&lt;span class=&quot;c&quot;&gt;# on the alphas, john may su to anyone but root and flags are not allowed&lt;/span&gt;
+john		ALPHA &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/bin/su &lt;span class=&quot;o&quot;&gt;[!&lt;/span&gt;-]&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;, &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;/usr/bin/su &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;root&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# jen can run anything on all machines except the ones&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# in the &quot;SERVERS&quot; Host_Alias&lt;/span&gt;
+jen		ALL, &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;SERVERS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; ALL
+
+&lt;span class=&quot;c&quot;&gt;# jill can run any commands in the directory /usr/bin/, except for&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# those in the SU and SHELLS aliases.&lt;/span&gt;
+jill		SERVERS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /usr/bin/, &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;SU, &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;SHELLS
+
+&lt;span class=&quot;c&quot;&gt;# steve can run any command in the directory /usr/local/op_commands/&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# as user operator.&lt;/span&gt;
+steve		CSNETS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;operator&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; /usr/local/op_commands/
+
+&lt;span class=&quot;c&quot;&gt;# matt needs to be able to kill things on his workstation when&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# they get hung.&lt;/span&gt;
+matt		valkyrie &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; KILL
+
+&lt;span class=&quot;c&quot;&gt;# users in the WEBMASTERS User_Alias (will, wendy, and wim)&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# may run any command as user www (which owns the web pages)&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# or simply su to www.&lt;/span&gt;
+WEBMASTERS	www &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;www&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; ALL, &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;root&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; /usr/bin/su www
+
+&lt;span class=&quot;c&quot;&gt;# anyone can mount/unmount a cd-rom on the machines in the CDROM alias&lt;/span&gt;
+ALL		CDROM &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; NOPASSWD: /sbin/umount /CDROM,&lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+		/sbin/mount &lt;span class=&quot;nt&quot;&gt;-o&lt;/span&gt; nosuid&lt;span class=&quot;se&quot;&gt;\,&lt;/span&gt;nodev /dev/cd0a /CDROM
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Eric Chong</name></author><category term="Linux" /><category term="sudo" /><category term="linux" /><category term="unix" /><summary type="html">Sudoer samples Sources http://www.courtesan.com/sudo/sample.sudoers https://www.sudo.ws/readme.html</summary></entry><entry><title type="html">json_query example with multiple search patterns</title><link href="http://localhost:4000/ansible/JSON_query_example/" rel="alternate" type="text/html" title="json_query example with multiple search patterns" /><published>2020-11-05T00:00:00-05:00</published><updated>2020-11-05T00:00:00-05:00</updated><id>http://localhost:4000/ansible/JSON_query_example</id><content type="html" xml:base="http://localhost:4000/ansible/JSON_query_example/">&lt;h2 id=&quot;find-vm-ip-address-when-not-on-the-defined-vm-network&quot;&gt;Find VM IP address when not on the defined VM network&lt;/h2&gt;
+&lt;p&gt;We deployed a KVM VM using macvtap connect directly to the physical network and getting a DHCP address.  How can we get the VM IP address from the hypervisor and use it in Ansible?&lt;/p&gt;
+
+&lt;p&gt;First pull the interfaces information using &lt;strong&gt;virsh qemu-agent-command&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Get temporary dhcp address for eth0&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;shell&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;virsh qemu-agent-command {{ inventory_hostname }} '{&quot;execute&quot;:&quot;guest-network-get-interfaces&quot;}' | sed 's/-/_/g'&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;register&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;vm_interfaces&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;delegate_to&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;libvirt_hypervisor_name&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The returned output uses “-“, therefore we need to do inline substitution with &lt;strong&gt;sed&lt;/strong&gt;.  The final JSON output looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;return&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;lo&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ip-addresses&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ip-address-type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;ipv4&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ip-address&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;127.0.0.1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;prefix&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ip-address-type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;ipv6&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ip-address&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;::1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;prefix&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;128&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;statistics&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;tx-packets&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;70&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;tx-errs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;rx-bytes&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5856&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;rx-dropped&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;rx-packets&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;70&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;rx-errs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;tx-bytes&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5856&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;tx-dropped&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;hardware-address&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;00:00:00:00:00:00&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;eth0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ip-addresses&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ip-address-type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;ipv4&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ip-address&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;192.168.0.187&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;prefix&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;24&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ip-address-type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;ipv6&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;ip-address&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;fe80::5054:ff:fe66:b8b0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;prefix&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;64&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;statistics&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;tx-packets&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;65&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;tx-errs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;rx-bytes&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8456&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;rx-dropped&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;rx-packets&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;57&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;rx-errs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;tx-bytes&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5642&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;tx-dropped&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;hardware-address&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;52:54:00:66:b8:b0&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We are only interested on the ipv4 address on eth0.  Use the following json_query to pull it into Ansible&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Get IP&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;set_fact&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;ip_address_list&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;interfaces.return&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;json_query(find_eth0)&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;vars&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;find_eth0&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;[?name=='eth0'].ip_addresses[]&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;[?ip_address_type=='ipv4'].ip_address&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Eric Chong</name></author><category term="Ansible" /><category term="Ansible" /><category term="json_query" /><category term="libvirt" /><category term="kvm" /><category term="virsh" /><summary type="html">Find VM IP address when not on the defined VM network We deployed a KVM VM using macvtap connect directly to the physical network and getting a DHCP address. How can we get the VM IP address from the hypervisor and use it in Ansible?</summary></entry><entry><title type="html">Find VM with the same name</title><link href="http://localhost:4000/ansible/Find_VM_with_the_same_name/" rel="alternate" type="text/html" title="Find VM with the same name" /><published>2020-10-23T00:00:00-04:00</published><updated>2020-10-23T00:00:00-04:00</updated><id>http://localhost:4000/ansible/Find_VM_with_the_same_name</id><content type="html" xml:base="http://localhost:4000/ansible/Find_VM_with_the_same_name/">&lt;h2 id=&quot;find-vm-with-the-same-name&quot;&gt;Find VM with the same name&lt;/h2&gt;
+&lt;p&gt;We want to make sure the VM only exists in the folder we want or not exists at all.&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Find VM with the same name&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;vmware_guest_find&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;hostname&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;vmware_vm_vcenter.hostname&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;vmware_vm_vcenter.username&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;vmware_vm_vcenter.password&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;validate_certs&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;vmware_vm_vcenter.validate_certs&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;default(false)&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;vmware_vm_vm.name&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;register&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;find_vm&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;delegate_to&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;localhost&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;ignore_errors&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;VM already exists.  Setup search string to match folder name.&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;set_fact&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;find_vm_search_string&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;vmware_vm_vm.folder&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}$&quot;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;when&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;not find_vm.failed&lt;/span&gt;
+
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Make sure VM exists only in the desired folder&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;assert&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;that&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;find_vm.folders | length == &lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;find_vm.folders[0] | regex_search( find_vm_search_string )&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;fail_msg&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;VM&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;vmware_vm_vm.name&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;already&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;exists&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;find_vm.folders&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;default()&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;when&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;not find_vm.faile&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Eric Chong</name></author><category term="Ansible" /><category term="Ansible" /><category term="VMware" /><category term="vm" /><summary type="html">Find VM with the same name We want to make sure the VM only exists in the folder we want or not exists at all.</summary></entry></feed>

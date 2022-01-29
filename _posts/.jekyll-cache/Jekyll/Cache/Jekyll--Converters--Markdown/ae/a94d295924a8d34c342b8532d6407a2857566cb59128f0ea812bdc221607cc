@@ -1,0 +1,15 @@
+I"¬<h2 id="how-to-search-events-in-activtiy-stream">How to search events in activtiy stream</h2>
+
+<h3 id="finding-all-user-creation-events">Finding all user creation events</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://&lt;Tower Hostname&gt;/api/v2/activity_stream/?operation=create&amp;object1=user
+</code></pre></div></div>
+
+<h3 id="finding-all-lauch-job-events">Finding all lauch job events</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/api/v2/activity_stream/?operation=create&amp;object1=job
+</code></pre></div></div>
+
+<h3 id="finding-all-delete-job-template-events">Finding all delete job template events</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/api/v2/activity_stream/?operation=delete&amp;object1=job_template
+</code></pre></div></div>
+
+:ET

@@ -1,0 +1,3 @@
+I"6<h2 id="find-vm-ip-address-when-not-on-the-defined-vm-network">Find VM IP address when not on the defined VM network</h2>
+<p>We deployed a KVM VM using macvtap connect directly to the physical network and getting a DHCP address.  How can we get the VM IP address from the hypervisor and use it in Ansible?</p>
+:ET

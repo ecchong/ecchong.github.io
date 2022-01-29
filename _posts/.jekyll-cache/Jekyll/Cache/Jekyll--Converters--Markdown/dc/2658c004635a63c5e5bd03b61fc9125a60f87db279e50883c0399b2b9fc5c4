@@ -1,0 +1,16 @@
+I"ž<h3 id="how-to-test-connection-to-host">How to test connection to host</h3>
+
+<p>We need to test connection to hosts, and run tasks on hosts that are online.  Hosts that are offline will be marked unreachable.  We need to clear them and continue next tasks on all hosts no matter they are online or off.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Test connections and run tasks</span>
+  <span class="na">block</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Check if host is online</span>
+    <span class="na">wait_for_connection</span><span class="pi">:</span>
+      <span class="na">timeout</span><span class="pi">:</span> <span class="m">3</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run some task on hosts that are reachable</span>
+    <span class="na">setup</span><span class="pi">:</span>
+  <span class="na">rescue</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Reset hosts list.  Continue on all hosts after this block</span>
+    <span class="na">meta</span><span class="pi">:</span> <span class="s">clear_host_errors</span>
+</code></pre></div></div>
+:ET

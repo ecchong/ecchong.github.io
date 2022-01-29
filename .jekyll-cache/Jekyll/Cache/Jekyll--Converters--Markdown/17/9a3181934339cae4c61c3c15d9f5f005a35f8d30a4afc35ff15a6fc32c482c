@@ -1,0 +1,161 @@
+I"ü<h1 id="automation-hub-ldap-and-sso">Automation Hub, LDAP and SSO</h1>
+<p>Latest version of Automation Hub does not has built-in LDAP support.  Instead it relies on Red Hat SSO to provide integration with the LDAP authentication.  Fortunately the AAP installation playbooks will assist setting up the SSO application on a separate VM with Automation Hub.</p>
+
+<h2 id="openldap">Openldap</h2>
+<p>First we will need a simple LDAP server.  We will be using Osixia OpenLDAP container image.</p>
+
+<p>Create a <code class="language-plaintext highlighter-rouge">Containerfile</code>:</p>
+<div class="language-docker highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">FROM</span><span class="s"> docker.io/osixia/openldap:latest</span>
+
+<span class="k">LABEL</span><span class="s"> maintainer="echong@redhat.com"</span>
+
+<span class="k">ENV</span><span class="s"> LDAP_ORGANISATION="Lab" \</span>
+    LDAP_DOMAIN="automate.nyc"
+
+<span class="k">COPY</span><span class="s"> bootstrap.ldif /container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif</span>
+</code></pre></div></div>
+
+<p>Create the bootstrap.ldif to preload the image with OUs, users and groups:</p>
+<pre><code class="language-ldif">dn: ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=automate,dc=nyc
+changetype: add
+objectClass: organizationalUnit
+ou: groups
+
+dn: uid=bbanner,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: The Hulk
+givenName: Bruce
+sn: Banner
+cn: Bruce Banner
+uid: bbanner
+mail: bbanner@automate.nyc
+userpassword: secret_password
+
+dn: uid=cbarton,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Hawkeye
+givenName: Clint
+sn: barton
+cn: Clint Barton
+uid: cbarton
+mail: cbarton@automate.nyc
+userpassword: secret_password
+
+... &lt;-- skipping the rest of the super heroes here
+</code></pre>
+<!--
+dn: uid=slang,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Ant Man
+givenName: Scott
+sn: Lang
+cn: Scott Lang
+uid: slang
+mail: slang@automate.nyc
+userpassword: secret_password
+
+dn: uid=tstark,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Iron Man
+givenName: Tony
+sn: Stark
+cn: Tony Stark
+uid: tstark
+mail: tstart@automate.nyc
+userpassword: secret_password
+
+dn: uid=cdanvers,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Captain Marvel
+givenName: Carol
+sn: Danvers
+cn: Carol Davers
+uid: cdanvers
+mail: cdanvers@automate.nyc
+userpassword: secret_password
+
+dn: uid=echong,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Eric Chong the admin
+givenName: Eric
+sn: Chong
+cn: Eric Chong
+uid: echong
+mail: echong@redhat.com
+userpassword: secret_password
+-->
+<pre><code class="language-ldif">dn: cn=admins,ou=groups,dc=automate,dc=nyc
+changetype: add
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: admins
+uniqueMember: uid=bbanner,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=echong,ou=people,dc=automate,dc=nyc
+
+dn: cn=operators,ou=groups,dc=automate,dc=nyc
+changetype: add
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: operators
+uniqueMember: uid=cbarton,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=tstark,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=cdanvers,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=slang,ou=people,dc=automate,dc=nyc
+</code></pre>
+
+<p>Build the image with the LDAP data:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>podman build <span class="nt">--tag</span> localhost/openldap:withdata <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>Start the container as root, since we are using privilege port 389:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>podman run <span class="se">\</span>
+   <span class="nt">--name</span> openldap <span class="se">\</span>
+   <span class="nt">--env</span> <span class="nv">LDAP_ORGANISATION</span><span class="o">=</span><span class="s2">"Lab"</span> <span class="se">\</span>
+   <span class="nt">--env</span> <span class="nv">LDAP_DOMAIN</span><span class="o">=</span><span class="s2">"automate.nyc"</span> <span class="se">\</span>
+   <span class="nt">--env</span> <span class="nv">LDAP_ADMIN_PASSWORD</span><span class="o">=</span><span class="s2">"test1234"</span> <span class="se">\</span>
+   <span class="nt">-p</span> 389:389 <span class="se">\</span>
+   <span class="nt">--detach</span> localhost/openldap:withdata
+</code></pre></div></div>
+
+<p>Bonus.  We can also start the <code class="language-plaintext highlighter-rouge">phpldapadmin</code> GUI in a second container:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>podman run <span class="nt">-p</span> 8090:80 <span class="se">\</span>
+   <span class="nt">--name</span> phpldapadmin <span class="se">\</span>
+   <span class="nt">--env</span> <span class="nv">PHPLDAPADMIN_LDAP_HOSTS</span><span class="o">=</span>192.168.1.209 <span class="se">\</span>
+   <span class="nt">--env</span> <span class="nv">PHPLDAPADMIN_HTTPS</span><span class="o">=</span><span class="s1">'false'</span> <span class="se">\</span>
+   <span class="nt">--detach</span> docker.io/osixia/phpldapadmin:0.9.0
+</code></pre></div></div>
+
+<p>Test the connection from AAP servers using <code class="language-plaintext highlighter-rouge">ldapsearch</code> command:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ldapsearch <span class="nt">-x</span> <span class="nt">-v</span> <span class="nt">-b</span> <span class="s1">'dc=automate,dc=nyc'</span> <span class="nt">-H</span> ldap://192.168.1.209:389 <span class="se">\</span>
+<span class="nt">-D</span> <span class="s1">'cn=admin,dc=automate,dc=nyc'</span> <span class="nt">-w</span> test1234 <span class="nt">-LLL</span>
+</code></pre></div></div>
+
+<h2 id="automation-hub-and-sso-servers">Automation Hub and SSO servers</h2>
+<p>Update the <code class="language-plaintext highlighter-rouge">inventory</code> file with additional information for setting SSO server.</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[sso]</span>
+<span class="err">aap-sso.lab.automate.nyc</span>
+
+<span class="nn">[all:vars]</span>
+<span class="err">sso_keystore_password:</span> <span class="err">secret_password</span>
+<span class="err">sso_console_admin_password:</span> <span class="err">secret_password</span>
+</code></pre></div></div>
+
+<p>Now run AAP installation script <code class="language-plaintext highlighter-rouge">setup.sh</code> to install SSO on the assigned server and setup the Automation Hub to use the SSO server for authentication.</p>
+
+<p>See <a href="https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.1/html/installing_and_configuring_central_authentication_for_the_ansible_automation_platform">Installing and Configuring Central Authentication for the Ansible Automation Platform</a></p>
+
+<p>My final SSO setting: <img src="/assets/images/2022/2022-01-17-sso-settings.png" alt="SSO Setting" /></p>
+
+<p>My user role mapping setting: <img src="/assets/images/2022/2022-01-17-sso-user-role-mapping.png" alt="User Role Mapping" /></p>
+:ET

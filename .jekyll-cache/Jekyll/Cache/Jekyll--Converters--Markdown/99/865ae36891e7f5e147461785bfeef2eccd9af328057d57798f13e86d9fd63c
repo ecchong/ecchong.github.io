@@ -1,0 +1,17 @@
+I".<h1 id="how-to-set-persistent-fact-in-tower">How to set persistent fact in Tower?</h1>
+
+<p>The playbook set_fact task must set “cacheable: true”</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">set cached fact</span>
+    <span class="na">set_fact</span><span class="pi">:</span>
+      <span class="na">my_var1</span><span class="pi">:</span> <span class="s1">'</span><span class="s">this</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">fact'</span>
+      <span class="na">my_var2</span><span class="pi">:</span> <span class="s1">'</span><span class="s">it</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">cacheable'</span>
+      <span class="na">cacheable</span><span class="pi">:</span> <span class="no">true</span>
+</code></pre></div></div>
+<p>In Tower, check option “Use Fact Cache” for the job template.  The facts will be store with the host.</p>
+
+<p>To retrieve the stored facts, recall the hostvars.</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Get cached fact</span>
+    <span class="na">debug</span><span class="pi">:</span>
+      <span class="na">msg</span><span class="pi">:</span> <span class="s2">"</span><span class="s">The</span><span class="nv"> </span><span class="s">cached</span><span class="nv"> </span><span class="s">fact</span><span class="nv"> </span><span class="s">are:</span><span class="nv">   </span><span class="s">"</span>
+</code></pre></div></div>
+:ET

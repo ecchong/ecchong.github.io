@@ -1,0 +1,15 @@
+I"º<h3 id="how-to-accept-eula-when-yum-installing-something">How to accept EULA when yum installing something?</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- name: Install mssql-tools and msodbcsql
+  yum:
+    name: ""
+    state: present
+  with_items:
+    - mssql-tools
+    - msodbcsql
+  environment:
+    ACCEPT_EULA: 'y'
+  become: true
+  become_user: root
+</code></pre></div></div>
+:ET

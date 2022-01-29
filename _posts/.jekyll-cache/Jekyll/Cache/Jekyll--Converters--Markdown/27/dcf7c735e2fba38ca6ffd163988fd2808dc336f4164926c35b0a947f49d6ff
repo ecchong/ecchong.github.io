@@ -1,0 +1,13 @@
+I"T<h3 id="how-to-create-a-virtual-nic-on-vnet-from-a-different-resource-group">How to create a virtual NIC on vnet from a different resource group.</h3>
+
+<p>Specify the full path of the vnet
+https://github.com/ansible/ansible/issues/29607</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create virtual NIC</span> 
+    <span class="na">azure_rm_networkinterface</span><span class="pi">:</span>
+      <span class="na">resource_group</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+      <span class="na">virtual_network</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/subscriptions//resourceGroups//providers/Microsoft.Network/virtualNetworks/"</span>
+      <span class="na">subnet</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+</code></pre></div></div>
+:ET

@@ -1,0 +1,82 @@
+I"-<h1 id="build-a-new-ee-image">Build a new EE image</h1>
+<p>We would like to use a third part collection, in this case <code class="language-plaintext highlighter-rouge">community.efficientip</code>, in our playbooks. The collection is currently in the Automation Hub server and it also requires a Python module, <code class="language-plaintext highlighter-rouge">SOLIDserverRest</code>, which is available via pip.  Since this Python module is no available in the standard execution environment, we will need to create a new EE image using <code class="language-plaintext highlighter-rouge">ansible-builder</code></p>
+
+<p>Inside the build directory, create a file called <code class="language-plaintext highlighter-rouge">execution-environment.yml</code>:</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">version</span><span class="pi">:</span> <span class="m">1</span>
+
+<span class="na">build_arg_defaults</span><span class="pi">:</span>
+  <span class="na">EE_BASE_IMAGE</span><span class="pi">:</span> <span class="s1">'</span><span class="s">aap-hub1.lab.automate.nyc/ee-supported-rhel8'</span>
+
+<span class="na">dependencies</span><span class="pi">:</span>
+  <span class="na">python</span><span class="pi">:</span> <span class="s">requirements-efficientip.txt</span>
+  <span class="na">galaxy</span><span class="pi">:</span> <span class="s">requirements.yml</span>
+
+<span class="na">ansible_config</span><span class="pi">:</span> <span class="s1">'</span><span class="s">ansible.cfg'</span>
+
+<span class="na">additional_build_steps</span><span class="pi">:</span>
+  <span class="na">prepend</span><span class="pi">:</span> <span class="pi">|</span>
+    <span class="s">RUN pip3 install --upgrade pip wheel setuptools</span>
+</code></pre></div></div>
+<p>We are going to use the standard EE image <code class="language-plaintext highlighter-rouge">ee-supported-rhel8</code> from my Automation Hub server <code class="language-plaintext highlighter-rouge">aap-hub1.lab.automate.nyc</code> as base image.  The dependency files identify required Python modules and collections.  In our case, the <code class="language-plaintext highlighter-rouge">requirement-efficientip.txt</code> contains the Python module name in pip format:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SOLIDserverRest
+</code></pre></div></div>
+<p>The <code class="language-plaintext highlighter-rouge">requirements.yml</code> file contains the list of required collections:</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">collections</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">community.crypto</span>
+<span class="pi">-</span> <span class="s">community.efficientip</span>
+</code></pre></div></div>
+<p>Since we will be pulling collections from our Automation Hub server, we will need to configure the <code class="language-plaintext highlighter-rouge">ansible.cfg</code> file with proper credentials:</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[galaxy]</span>
+<span class="py">server_list</span> <span class="p">=</span> <span class="s">automation_hub, rh-certified_repo, published_repo, community_repo</span>
+
+<span class="nn">[galaxy_server.automation_hub]</span>
+<span class="py">url</span><span class="p">=</span><span class="s">https://aap-hub1.lab.automate.nyc/api/galaxy/</span>
+<span class="py">token</span><span class="p">=</span><span class="s">&lt;token string&gt;</span>
+
+<span class="nn">[galaxy_server.rh-certified_repo]</span>
+<span class="py">url</span><span class="p">=</span><span class="s">https://aap-hub1.lab.automate.nyc/api/galaxy/content/rh-certified/</span>
+<span class="py">token</span><span class="p">=</span><span class="s">&lt;token string&gt;</span>
+
+<span class="nn">[galaxy_server.published_repo]</span>
+<span class="py">url</span><span class="p">=</span><span class="s">https://aap-hub1.lab.automate.nyc/api/galaxy/content/published/</span>
+<span class="py">token</span><span class="p">=</span><span class="s">&lt;token string&gt;</span>
+
+<span class="nn">[galaxy_server.community_repo]</span>
+<span class="py">url</span><span class="p">=</span><span class="s">https://aap-hub1.lab.automate.nyc/api/galaxy/content/community/</span>
+<span class="py">token</span><span class="p">=</span><span class="s">&lt;token string&gt;</span>
+</code></pre></div></div>
+<p>To create a new image, run command:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible-builder build <span class="nt">--tag</span> aap-hub1.lab.automate.nyc/efficientip_ee <span class="nt">--container-runtime</span> docker
+</code></pre></div></div>
+<p>The image will be tagged with our Automation Hub server name, so it can be pushed to our server once it is created.  Default <code class="language-plaintext highlighter-rouge">ansible-builder</code> command will use <code class="language-plaintext highlighter-rouge">podman</code>, but in this case we will be using <code class="language-plaintext highlighter-rouge">docker</code> while running on MacOS.</p>
+
+<p>After the build is done, we can verify the new image with <code class="language-plaintext highlighter-rouge">ansible-navigator</code> command.  To list the installed collections:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible-navigator collections <span class="nt">--ce</span> docker  <span class="nt">--eei</span> aap-hub1.lab.automate.nyc/efficientip_ee
+</code></pre></div></div>
+<p>Again, we are running on MacOS, so we will need to specify to use <code class="language-plaintext highlighter-rouge">docker</code> as our container engine.</p>
+
+<p>Publish the EE image with the same method as to any container registry:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>docker login <span class="nt">--username</span> admin aap-hub1.lab.automate.nyc
+Password: 
+Login Succeeded
+<span class="nv">$ </span>docker push aap-hub1.lab.automate.nyc/efficientip_ee
+Using default tag: latest
+The push refers to repository <span class="o">[</span>aap-hub1.lab.automate.nyc/efficientip_ee]
+206894a40f6c: Layer already exists 
+2e257b8b9924: Layer already exists 
+d1803f81822a: Layer already exists 
+9b2e1ea8a49b: Layer already exists 
+4fe50fe3a3b7: Layer already exists 
+c02d758c2215: Layer already exists 
+a65a1b01a4d2: Layer already exists 
+af092941766c: Layer already exists 
+latest: digest: sha256:8deba4dad1c74013ab02c41ce5f87f1353b4e85841ae88eacafdc8d9aed9b4fe size: 2009
+</code></pre></div></div>
+
+<h1 id="references">References</h1>
+<p><a href="https://www.ansible.com/blog/introduction-to-ansible-builder">Introduction to Ansible Builder</a></p>
+
+<p><a href="https://www.ansible.com/blog/automating-execution-environment-image-builds-with-github-actions">Automating execution environment image builds with GitHub Actions</a></p>
+:ET

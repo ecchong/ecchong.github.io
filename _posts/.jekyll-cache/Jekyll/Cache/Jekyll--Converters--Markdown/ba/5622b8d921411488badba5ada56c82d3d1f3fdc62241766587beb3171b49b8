@@ -1,0 +1,29 @@
+I"Ç<h2 id="how-to-add-a-custom-firewall-rule-to-esxi">How to add a custom firewall rule to ESXi</h2>
+
+<p>The vCenter or ESXi web GUI only allow turning pre-fined ports on and off.  What to do if we need to add a custom port?  For example, connecting to a iSCSI device using port 3261.</p>
+
+<p>Create an XML file /etc/vmware/firewall/custom_iscsi.xml</p>
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- Firewall configuration information for custom iSCSI port--&gt;</span>
+<span class="nt">&lt;ConfigRoot&gt;</span>
+  <span class="nt">&lt;service&gt;</span>
+    <span class="nt">&lt;id&gt;</span>custom_iscsi<span class="nt">&lt;/id&gt;</span>
+    <span class="nt">&lt;rule</span> <span class="na">id=</span><span class="s">'0000'</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;direction&gt;</span>outbound<span class="nt">&lt;/direction&gt;</span>
+      <span class="nt">&lt;protocol&gt;</span>tcp<span class="nt">&lt;/protocol&gt;</span>
+      <span class="nt">&lt;porttype&gt;</span>dst<span class="nt">&lt;/porttype&gt;</span>
+      <span class="nt">&lt;port&gt;</span>3261<span class="nt">&lt;/port&gt;</span>
+    <span class="nt">&lt;/rule&gt;</span>
+    <span class="nt">&lt;enabled&gt;</span>true<span class="nt">&lt;/enabled&gt;</span>
+    <span class="nt">&lt;required&gt;</span>false<span class="nt">&lt;/required&gt;</span>
+  <span class="nt">&lt;/service&gt;</span>
+<span class="nt">&lt;/ConfigRoot&gt;</span>
+</code></pre></div></div>
+
+<p>Reload the firewall rule</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli network firewall refresh
+</code></pre></div></div>
+<p>Check if the rule has been added</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli network firewall ruleset list
+</code></pre></div></div>
+<p>The rule should be visible both from command line or web GUI.</p>
+:ET

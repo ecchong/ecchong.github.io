@@ -1,0 +1,67 @@
+I"�<h2 id="some-examples-to-use-the-search-box-in-tower-to-filter-or-create-smart-inventory">Some examples to use the search box in Tower to filter or create smart inventory</h2>
+
+<p>see (https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)[https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html]</p>
+<h3 id="find-disabled-hosts">Find disabled hosts</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>enabled:false
+</code></pre></div></div>
+
+<h3 id="find-hosts-with-hostvar-defined">Find hosts with hostvar defined</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>variables.icontains:myvar
+</code></pre></div></div>
+
+<h3 id="use-as-host-filter-on-tower-cli">Use as host filter on tower-cli</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tower-cli host list <span class="nt">--host-filter</span> <span class="s1">'variables__icontains=application'</span>
+</code></pre></div></div>
+
+<h3 id="find-hosts-with-ansible-facts-equal-a-value">Find hosts with ansible facts equal a value</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible_facts.ansible_os_family:RedHat
+</code></pre></div></div>
+
+<h3 id="find-hosts-in-organization">Find hosts in organization</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>organization.name:Default
+</code></pre></div></div>
+
+<h3 id="find-hosts-in-a-group-belongs-to-an-inventory">Find hosts in a group belongs to an inventory</h3>
+<p>First we need to find the group number using the api URL.
+For example, to list groups info for inventory id 18
+https://tower-host.com/api/v2/inventories/18/groups/
+Then use the group id in the filter</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">groups</span>:482
+</code></pre></div></div>
+
+<h3 id="find-hosts-in-a-group-name-from-any-inventory">Find hosts in a group name from any inventory</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>groups.name:mygroup
+</code></pre></div></div>
+
+<h3 id="find-hosts-that-failed-the-last-job">Find hosts that failed the last job</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>has_active_failures:true
+</code></pre></div></div>
+<h3 id="find-hosts-by-name">Find hosts by name</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>name.startswith:dev
+name.exact:devhost4
+name.istartwith:dev
+name.endswith:4
+name.regex:^dev.<span class="k">*</span>4<span class="err">$</span>
+</code></pre></div></div>
+
+<h3 id="using-the-host-filter-on-tower-cli">Using the host filter on tower-cli</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tower-cli host list <span class="nt">--host-filter</span> <span class="nv">name__endswith</span><span class="o">=</span>80 <span class="nt">-vvv</span>
+tower-cli host list <span class="nt">--host-filter</span> <span class="nv">name__startswith</span><span class="o">=</span>RN
+tower-cli host list <span class="nt">--host-filter</span> <span class="s1">'name__regex=fedora[0-9]'</span>
+tower-cli host list <span class="nt">--host-filter</span> <span class="s1">'name__startswith=RN and name__regex=01$'</span>
+</code></pre></div></div>
+
+<h3 id="find-dev-hosts-that-are-marked-as-d-on-the-6th-characters">Find dev hosts that are marked as ‘d’ on the 6th characters</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>name.regex:^.<span class="o">{</span>5<span class="o">}</span>d
+</code></pre></div></div>
+
+<h3 id="find-a-template-id-by-name-using-curl">Find a template ID by name using curl</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-k</span> <span class="nt">-u</span> john:secret https://192.168.0.101/api/v2/job_templates/?name<span class="o">=</span><span class="s1">'My Template'</span> | python3 <span class="nt">-c</span> <span class="s1">'import json,sys; print (json.load(sys.stdin)["results"][0]["id"])'</span>
+</code></pre></div></div>
+
+<h3 id="find-a-template-id-by-name-using-tower-cli">Find a template ID by name using tower-cli</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tower-cli job_template list <span class="nt">--name</span> <span class="s1">'Rolling Test'</span> <span class="nt">--format</span> <span class="nb">id</span>
+</code></pre></div></div>
+
+<h3 id="no-space-in-any-search-string">No space in any search string.</h3>
+:ET

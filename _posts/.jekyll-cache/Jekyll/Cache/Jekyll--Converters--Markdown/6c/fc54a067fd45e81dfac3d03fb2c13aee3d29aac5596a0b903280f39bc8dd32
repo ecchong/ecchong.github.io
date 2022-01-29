@@ -1,0 +1,10 @@
+I"º<h3 id="how-to-install-a-virtual-environment-with-specific-versions-of-python-and-ansible">How to install a virtual environment with specific versions of Python and Ansible</h3>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>download python-2.7.5
+./configure <span class="nt">--prefix</span><span class="o">=</span>/home/echong/PYTHON-2.7.5
+make
+make <span class="nb">install
+</span>virtualenv <span class="nt">--python</span><span class="o">=</span>PYTHON-2.7.5/bin/python venv-azure
+<span class="nb">source </span>venv-azure/bin/activate
+pip <span class="nb">install </span>ansible[azure]<span class="o">==</span>2.5.0
+</code></pre></div></div>
+:ET

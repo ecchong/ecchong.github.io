@@ -1,0 +1,3 @@
+I"K<h1 id="how-to-filter-hosts-on-tower-inventory-import">How to filter hosts on Tower inventory import</h1>
+<p>Some examples using filters when importing inventory from vCenter.  See the <a href="https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_vm_inventory_inventory.html">plugin doc</a> for details.</p>
+:ET

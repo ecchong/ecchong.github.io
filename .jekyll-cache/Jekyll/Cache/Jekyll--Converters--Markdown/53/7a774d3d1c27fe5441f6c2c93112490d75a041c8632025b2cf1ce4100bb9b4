@@ -1,0 +1,72 @@
+I" <h3 id="how-to-write-data-from-multiple-hosts-to-a-single-file">How to write data from multiple hosts to a single file</h3>
+
+<p>We need to gather information from multiple hosts and store them to a single file.  Possibly email it to someone as an attachment.</p>
+
+<p>We can use lineinfile or blockinfile module with delegate_to localhost to write the information to a single file.  However, both modules do not handle concurrent write probably.  The file will be overwritten by the same task of different host.</p>
+
+<p><strong>Solution 1:  Use Serial</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="pi">-</span> <span class="na">hosts</span><span class="pi">:</span> <span class="s">all</span>
+  <span class="na">gather_facts</span><span class="pi">:</span> <span class="s">no</span>
+  <span class="na">serial</span><span class="pi">:</span> <span class="m">1</span>
+
+  <span class="na">tasks</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">shell</span><span class="pi">:</span> <span class="s">hostname</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">hostname_output</span>
+
+  <span class="pi">-</span> <span class="na">shell</span><span class="pi">:</span> <span class="s">lslogin</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">lslogin_output</span>
+
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Write to single file</span>
+    <span class="na">blockinfile</span><span class="pi">:</span>
+      <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/tmp/ansible_temp_one_big_file.txt"</span>
+      <span class="na">create</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">marker</span><span class="pi">:</span> <span class="s2">"</span><span class="s">#</span><span class="nv"> </span><span class="s">{mark}</span><span class="nv"> </span><span class="s">ANSIBLE</span><span class="nv"> </span><span class="s">MANAGED</span><span class="nv"> </span><span class="s">BLOCK</span><span class="nv">  </span><span class="s">{{</span><span class="nv"> </span><span class="s">hostname_output.stdout</span><span class="nv"> </span><span class="s">}}"</span>
+      <span class="na">block</span><span class="pi">:</span> <span class="pi">|</span>
+        <span class="s">{{ hostname_output.stdout }}</span>
+        <span class="s">{{ lslogin_output.stdout }}</span>
+    <span class="na">delegate_to</span><span class="pi">:</span> <span class="s">localhost</span>
+    <span class="na">run_once</span><span class="pi">:</span> <span class="no">true</span>
+</code></pre></div></div>
+
+<p>This will execcute the blockinfile task one at a time.  However, it might not be possible if other tasks need to be run concurrently.</p>
+
+<p><strong>Solution 2: Use facts and loop</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="pi">-</span> <span class="na">hosts</span><span class="pi">:</span> <span class="s">all</span>
+  <span class="na">gather_facts</span><span class="pi">:</span> <span class="s">no</span>
+
+  <span class="na">tasks</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">shell</span><span class="pi">:</span> <span class="s">hostname</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">hostname_output</span>
+
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Store hostname</span>
+    <span class="na">set_fact</span><span class="pi">:</span>
+      <span class="na">my_hostname</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">hostname_output.stdout</span><span class="nv"> </span><span class="s">}}"</span>
+
+  <span class="pi">-</span> <span class="na">shell</span><span class="pi">:</span> <span class="s2">"</span><span class="nv"> </span><span class="s">ps</span><span class="nv"> </span><span class="s">-ef</span><span class="nv"> </span><span class="s">"</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">lslogin_output</span>
+
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Store lslogin</span>
+    <span class="na">set_fact</span><span class="pi">:</span>
+      <span class="na">my_lslogin</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">lslogin_output.stdout</span><span class="nv"> </span><span class="s">}}"</span>
+
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Write to single file</span>
+    <span class="na">blockinfile</span><span class="pi">:</span>
+      <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/tmp/ansible_temp_one_big_file.txt"</span>
+      <span class="na">create</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">marker</span><span class="pi">:</span> <span class="s2">"</span><span class="s">#</span><span class="nv"> </span><span class="s">{mark}</span><span class="nv"> </span><span class="s">ANSIBLE</span><span class="nv"> </span><span class="s">MANAGED</span><span class="nv"> </span><span class="s">BLOCK</span><span class="nv">  </span><span class="s">{{</span><span class="nv"> </span><span class="s">hostvars[host].my_hostname</span><span class="nv"> </span><span class="s">}}"</span>
+      <span class="na">block</span><span class="pi">:</span> <span class="pi">|</span>
+        <span class="s">{{ hostvars[host].my_hostname }}</span>
+        <span class="s">{{ hostvars[host].my_lslogin }}</span>
+    <span class="na">loop</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">ansible_play_hosts_all</span><span class="nv"> </span><span class="s">}}"</span>
+    <span class="na">loop_control</span><span class="pi">:</span>
+      <span class="na">loop_var</span><span class="pi">:</span> <span class="s">host</span>
+    <span class="na">delegate_to</span><span class="pi">:</span> <span class="s">localhost</span>
+    <span class="na">run_once</span><span class="pi">:</span> <span class="no">true</span>
+</code></pre></div></div>
+
+<p>The information will be stored as facts.  The blockinfile task will loop thru the list of play hosts and execute one a time.</p>
+:ET

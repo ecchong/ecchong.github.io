@@ -1,0 +1,15 @@
+I"�<h3 id="smart-inventory-filter-examples">Smart inventory filter examples</h3>
+
+<p>These examples show how to create smart inventory in Tower using facts.</p>
+
+<h4 id="hosts-with-a-cached-fact-some_fact-with-value-some_value">Hosts with a cached fact “some_fact” with value “some_value”</h4>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible_facts.some_fact:<span class="s2">"some_value"</span>
+</code></pre></div></div>
+
+<h4 id="using-collected-facts">Using collected facts</h4>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible_facts.facter_os.name:<span class="s2">"RedHat"</span>
+ansible_facts.facter_os.release.full:<span class="s2">"7.6"</span>
+ansible_facts.facter_os.release.major:<span class="s2">"7"</span>
+ansible_facts.facter_dmi.product.name:<span class="s2">"VMware Virtual Platform"</span>
+</code></pre></div></div>
+:ET

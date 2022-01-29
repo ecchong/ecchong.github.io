@@ -1,0 +1,40 @@
+I"<h3 id="how-to-use-azure-rest-api">How to use Azure REST API.</h3>
+
+<p>Use azure_rm_resource module.  Install the Azure REST for Ansible extension for VSCode to help create the skeleton Ansible task.  It works best with Ansible 2.7.  Below version 2.7, it seems to require to uncomment the url line.</p>
+
+<p>For example, to run command on VM</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">hosts</span><span class="pi">:</span> <span class="s">localhost</span>
+  <span class="na">connection</span><span class="pi">:</span> <span class="s">local</span>
+  <span class="na">gather_facts</span><span class="pi">:</span> <span class="s">no</span>
+
+  <span class="na">vars</span><span class="pi">:</span>
+    <span class="na">resource_group</span><span class="pi">:</span> <span class="s">eric-rg-test</span>
+    <span class="na">vmname</span><span class="pi">:</span> <span class="s">eric-winvm-1</span>
+
+  <span class="na">tasks</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Sample for Azure REST API - VirtualMachines_RunCommand</span>
+      <span class="na">azure_rm_resource</span><span class="pi">:</span>
+        <span class="c1">#url: /subscriptions/{{ lookup('env','AZURE_SUBSCRIPTION_ID') }}/resourceGroups/{{ resource_group }}/providers/Microsoft.Compute/virtualMachines/{{ vmname }}/runCommand</span>
+        <span class="na">api_version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">2018-10-01'</span>
+        <span class="na">method</span><span class="pi">:</span> <span class="s">POST</span>
+        <span class="na">resource_group</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">resource_group</span><span class="nv"> </span><span class="s">}}"</span>
+        <span class="na">provider</span><span class="pi">:</span> <span class="s">compute</span>
+        <span class="na">resource_type</span><span class="pi">:</span> <span class="s">virtualmachines</span>
+        <span class="na">resource_name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">vmname</span><span class="nv"> </span><span class="s">}}"</span>
+        <span class="na">subresource</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="na">type</span><span class="pi">:</span> <span class="s">runcommand</span>
+        <span class="na">body</span><span class="pi">:</span>
+          <span class="na">commandId</span><span class="pi">:</span> <span class="s">RunPowerShellScript</span>
+          <span class="na">script</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">$url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"</span>
+          <span class="pi">-</span> <span class="s">$file = "c:\temp\ConfigureRemotingForAnsible.ps1"</span>
+<span class="c1">#          - $file = "$env:temp\ConfigureRemotingForAnsible.ps1"</span>
+          <span class="pi">-</span> <span class="s">(New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)</span>
+          <span class="pi">-</span> <span class="s">powershell.exe -ExecutionPolicy ByPass -File $file</span>
+      <span class="na">register</span><span class="pi">:</span> <span class="s">output</span>
+
+    <span class="pi">-</span> <span class="na">debug</span><span class="pi">:</span>
+        <span class="na">msg</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">output</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+:ET

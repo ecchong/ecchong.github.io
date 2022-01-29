@@ -1,0 +1,28 @@
+I"<h3 id="how-to-check-async-task-status">How to check async task status</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">Asynchronous Task Status</span>
+<span class="s">To check task status, use async_status module</span>
+
+<span class="na">Required parameter</span><span class="pi">:</span> <span class="na">Job or task identifier</span><span class="pi">:</span>
+
+<span class="nn">---</span>
+<span class="c1"># Async status - fire-forget.yml</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Async status with fire and forget task</span>
+  <span class="na">hosts</span><span class="pi">:</span> <span class="s">demoservers</span>
+  <span class="na">remote_user</span><span class="pi">:</span> <span class="s">devops</span>
+  <span class="na">become</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">tasks</span><span class="pi">:</span>
+
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Download big file</span>
+      <span class="na">get_url</span><span class="pi">:</span> <span class="s">url=http://demo.example.com/bigfile.tar.gz</span>
+      <span class="na">async</span><span class="pi">:</span> <span class="m">3600</span>
+      <span class="na">poll</span><span class="pi">:</span> <span class="m">0</span>
+      <span class="na">register</span><span class="pi">:</span> <span class="s">download_sleeper</span>
+
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Wait for download to finish</span>
+      <span class="na">async_status</span><span class="pi">:</span> <span class="s">jid=</span>
+      <span class="na">register</span><span class="pi">:</span> <span class="s">job_result</span>
+      <span class="na">until</span><span class="pi">:</span> <span class="s">job_result.finished</span>
+      <span class="na">retries</span><span class="pi">:</span> <span class="m">30</span>
+</code></pre></div></div>
+:ET

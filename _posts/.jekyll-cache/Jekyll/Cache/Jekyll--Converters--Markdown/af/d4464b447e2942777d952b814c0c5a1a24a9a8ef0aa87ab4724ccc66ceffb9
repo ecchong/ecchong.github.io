@@ -1,0 +1,4 @@
+I"8<h3 id="refresh-inventory-mid-play">Refresh inventory mid play</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">meta</span><span class="pi">:</span> <span class="s">refresh_inventory</span>
+</code></pre></div></div>
+:ET

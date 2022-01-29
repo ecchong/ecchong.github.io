@@ -1,0 +1,15 @@
+I"J<h2 id="get-the-list-of-block-devices-from-facts-gathering">Get the list of block devices from facts gathering</h2>
+
+<p>To just display the list of devices</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">debug</span><span class="pi">:</span>
+      <span class="na">msg</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">ansible_devices.keys()</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+
+<p>Get list of devices with “Virtual disk” as model</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">debug</span><span class="pi">:</span>
+      <span class="na">msg</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">ansible_devices</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">dict2items</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">selectattr("value.model","equalto","Virtual</span><span class="nv"> </span><span class="s">disk")</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">map(attribute="key")</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">list</span><span class="nv"> </span><span class="s">}}'</span>
+</code></pre></div></div>
+
+:ET

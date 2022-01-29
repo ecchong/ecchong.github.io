@@ -1,0 +1,12 @@
+I"z<h3 id="wait-until-a-lock-file-is-removed-by-other-process">Wait until a lock file is removed by other process</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Wait until lock file is</span>
+    <span class="na">stat</span><span class="pi">:</span>
+      <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">lck_file</span>
+    <span class="na">until</span><span class="pi">:</span> <span class="s">lck_file.stat.exists == False</span>
+    <span class="na">retries</span><span class="pi">:</span> <span class="m">10</span>
+    <span class="na">delay</span><span class="pi">:</span> <span class="m">5</span>
+    <span class="na">when</span><span class="pi">:</span> <span class="s">inventory_hostname != esxi_host.name</span>
+    <span class="na">delegate_to</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+</code></pre></div></div>
+:ET

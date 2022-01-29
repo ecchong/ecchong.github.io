@@ -1,0 +1,16 @@
+I"¯<h3 id="how-to-update-text-file">How to update text file</h3>
+
+<ol>
+  <li>Need to add account ansible_acct_name to SYS_ADMIN group in sudo file if it is not already there.
+    <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Add svc_ansible to sudo file</span>
+ <span class="na">lineinfile</span><span class="pi">:</span>
+   <span class="na">path</span><span class="pi">:</span> <span class="s">/etc/sudoers</span>
+   <span class="na">state</span><span class="pi">:</span> <span class="s">present</span>
+   <span class="na">backrefs</span><span class="pi">:</span> <span class="s">yes</span>
+   <span class="na">regex</span><span class="pi">:</span> <span class="s1">'</span><span class="s">(^User_Alias\s+SYS_ADMIN\s+)=(((?!).)*)$'</span>
+   <span class="na">line</span><span class="pi">:</span> <span class="s1">'</span><span class="s">\1=\2,</span><span class="nv"> </span><span class="s">'</span>
+   <span class="na">validate</span><span class="pi">:</span> <span class="s">/usr/sbin/visudo -cf %s</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+:ET

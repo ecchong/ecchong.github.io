@@ -1,0 +1,12 @@
+I"L<h2 id="how-to-pass-variables-between-job-templates-in-a-workflow-template">How to pass variables between job templates in a workflow template</h2>
+
+<p>Use the <strong>set_stats</strong> module to store variables in one job template and then retrive them as variables in following job templates.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Set stats</span>
+    <span class="na">set_stats</span><span class="pi">:</span>
+      <span class="na">data</span><span class="pi">:</span>
+        <span class="na">myvar</span><span class="pi">:</span> <span class="s">first template status</span>
+</code></pre></div></div>
+
+<p>Check Ansible doc for other options of <strong>set_stats</strong></p>
+:ET

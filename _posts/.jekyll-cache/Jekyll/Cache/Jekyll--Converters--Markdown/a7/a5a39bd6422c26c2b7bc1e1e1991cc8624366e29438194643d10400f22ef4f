@@ -1,0 +1,19 @@
+I"<h3 id="start-the-asynchronous-task-and-check-status-later">Start the asynchronous task and check status later</h3>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run sleep</span>
+    <span class="na">shell</span><span class="pi">:</span> <span class="s">sleep </span><span class="m">30</span>
+    <span class="na">async</span><span class="pi">:</span> <span class="m">30</span>
+    <span class="na">poll</span><span class="pi">:</span> <span class="m">0</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">async_output</span>
+
+  <span class="pi">-</span> <span class="na">debug</span><span class="pi">:</span>
+      <span class="na">msg</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Started</span><span class="nv"> </span><span class="s">an</span><span class="nv"> </span><span class="s">async</span><span class="nv"> </span><span class="s">job</span><span class="nv"> </span><span class="s">"</span>
+
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">check async status</span>
+    <span class="na">async_status</span><span class="pi">:</span>
+      <span class="na">jid</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">async_result</span>
+    <span class="na">until</span><span class="pi">:</span> <span class="s">async_result.finished</span>
+    <span class="na">retries</span><span class="pi">:</span> <span class="m">50</span>
+    <span class="na">delay</span><span class="pi">:</span> <span class="m">5</span>
+</code></pre></div></div>
+:ET

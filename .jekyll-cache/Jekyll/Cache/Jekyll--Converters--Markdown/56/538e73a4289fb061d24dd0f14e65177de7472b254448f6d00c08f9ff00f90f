@@ -1,0 +1,34 @@
+I"<h2 id="how-to-launch-a-job-or-workflow-via-rest-api-call">How to launch a job or workflow via REST API call</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="na">tasks</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Launch Tower Job</span>
+    <span class="na">uri</span><span class="pi">:</span>
+      <span class="na">url</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">tower_url</span><span class="nv"> </span><span class="s">}}/job_templates/{{</span><span class="nv"> </span><span class="s">template_id</span><span class="nv"> </span><span class="s">}}/launch/'</span>
+      <span class="na">return_cotent</span><span class="pi">:</span> <span class="s">yes</span>
+      <span class="na">method</span><span class="pi">:</span> <span class="s">POST</span>
+      <span class="na">user</span><span class="pi">:</span> <span class="s">admin</span>
+      <span class="na">password</span><span class="pi">:</span> <span class="s">password</span>
+      <span class="na">headers</span><span class="pi">:</span>
+        <span class="na">Content-Type</span><span class="pi">:</span> <span class="s1">'</span><span class="s">application/json'</span>
+      <span class="na">body</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{</span><span class="se">\"</span><span class="s">extra_vars</span><span class="se">\"</span><span class="s">:{</span><span class="se">\"</span><span class="s">sleep_time</span><span class="se">\"</span><span class="s">:</span><span class="se">\"</span><span class="s">5</span><span class="se">\"</span><span class="s">}}"</span>
+      <span class="na">status_code</span><span class="pi">:</span> <span class="m">201</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">output</span>
+
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Get job status</span>
+    <span class="na">uri</span><span class="pi">:</span>
+      <span class="na">url</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">tower_url</span><span class="nv"> </span><span class="s">}}/jobs/{{</span><span class="nv"> </span><span class="s">output.json.id</span><span class="nv"> </span><span class="s">}}/'</span>
+      <span class="na">return_cotent</span><span class="pi">:</span> <span class="s">yes</span>
+      <span class="na">method</span><span class="pi">:</span> <span class="s">GET</span>
+      <span class="na">user</span><span class="pi">:</span> <span class="s">admin</span>
+      <span class="na">password</span><span class="pi">:</span> <span class="s">password</span>
+      <span class="na">headers</span><span class="pi">:</span>
+        <span class="na">Content-Type</span><span class="pi">:</span> <span class="s1">'</span><span class="s">application/json'</span>
+      <span class="na">status_code</span><span class="pi">:</span> <span class="m">200</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">job_status</span>
+    <span class="na">until</span><span class="pi">:</span> <span class="s">job_status.status == 'successful'</span>
+    <span class="na">retries</span><span class="pi">:</span> <span class="m">2</span>
+    <span class="na">delay</span><span class="pi">:</span> <span class="m">120</span>
+</code></pre></div></div>
+
+<p>Noted that extra_vars need to be set to prompt on launch in order to allow passing extra variables thru the REST API call.  Current version of Tower (3.4) does not allow prompt on launch for workflow template.  So we need to create a survey form with the intended extra variables name.</p>
+:ET

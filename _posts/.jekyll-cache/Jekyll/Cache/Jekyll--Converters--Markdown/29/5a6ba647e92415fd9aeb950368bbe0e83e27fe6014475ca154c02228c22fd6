@@ -1,0 +1,11 @@
+I"<h3 id="using-python-yaml-module">Using python yaml module</h3>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python <span class="nt">-c</span> <span class="s1">'import yaml, sys; print yaml.load(sys.stdin);'</span> &lt; my_playbook.yml
+</code></pre></div></div>
+<p>If no syntax error exists, Python prints the contents of the YAML file to stdout in JSON format.</p>
+
+<p>The example here shows the use of the Python method on a YAML file with valid syntax.</p>
+
+<h3 id="use-syntax-check-option">Use –syntax-check option</h3>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible-playbook <span class="nt">--syntax-check</span> my_playbook.yml
+</code></pre></div></div>
+:ET

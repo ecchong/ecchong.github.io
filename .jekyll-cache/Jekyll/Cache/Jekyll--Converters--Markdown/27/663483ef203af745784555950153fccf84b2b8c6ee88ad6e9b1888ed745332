@@ -1,0 +1,7 @@
+I";<h3 id="how-to-launch-tower-job-using-curl">How to launch Tower job using Curl</h3>
+
+<p>Launching a job template from command line using Curl.  Passing extra_vars in the body.  Make sure extra variables “Prompt on launch” is enabled, so extra_vars can be passed.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-f</span> <span class="nt">-k</span> <span class="nt">-H</span> <span class="s1">'Content-Type: application/json'</span> <span class="nt">-H</span> <span class="s1">'Authorization: Bearer YF6pz330n7MjOGiZ5mQEM0024X6Ut7'</span> <span class="nt">-XPOST</span> <span class="nt">-d</span> <span class="s1">'{"extra_vars": "{\"hello\": \"world\"}" }'</span> https://tower.lab.home/api/v2/job_templates/497/launch/
+</code></pre></div></div>
+:ET

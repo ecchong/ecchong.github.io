@@ -1,0 +1,63 @@
+I"Ø<h3 id="how-to-use-jinja2-inside-a-playbook">How to use Jinja2 inside a playbook</h3>
+
+<ol>
+  <li>To create variables</li>
+</ol>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">set_fact</span><span class="pi">:</span>
+    <span class="na">foo</span><span class="pi">:</span> <span class="pi">|</span>
+      <span class="s">{% set aks_modified = dict() %}</span>
+      <span class="s">{% for ak in activation_keys %}</span>
+      <span class="s">{{ aks_modified.update({ak:[]}) }}</span>
+      <span class="s">{% endfor %}</span>
+      <span class="s">{{ aks_modified | to_json }}</span>
+</code></pre></div></div>
+
+<ol>
+  <li>To loop in range</li>
+</ol>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">debug</span><span class="pi">:</span>
+      <span class="na">msg</span><span class="pi">:</span> <span class="pi">|</span>
+       <span class="s">{%- for i in range(0,10) -%}</span>
+          <span class="s">{{ i }}</span>
+       <span class="s">{%- endfor -%}</span>
+</code></pre></div></div>
+
+<ol>
+  <li>To dynamically assign variables</li>
+</ol>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="na">vars</span><span class="pi">:</span>
+    <span class="na">foo</span><span class="pi">:</span> <span class="s1">'</span><span class="s">hello'</span>
+    <span class="na">bar</span><span class="pi">:</span> <span class="s1">'</span><span class="s">byebye'</span>
+    <span class="na">x</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">'foo'</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">ansible_distribution_major_version</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">'7'</span><span class="nv"> </span><span class="s">else</span><span class="nv"> </span><span class="s">'bar'</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+
+<ol>
+  <li>If-then-else</li>
+</ol>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="na">vars</span><span class="pi">:</span>
+    <span class="na">test</span><span class="pi">:</span> <span class="s">this is a test environment</span>
+    <span class="na">uat</span><span class="pi">:</span> <span class="s">this is a uat environment</span>
+    <span class="na">prod</span><span class="pi">:</span> <span class="s">this isa prod environment</span>
+  <span class="na">tasks</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">set_facts</span><span class="pi">:</span>
+      <span class="na">env_vars</span><span class="pi">:</span>  <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">test</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">(</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">'test'</span><span class="nv"> </span><span class="s">)</span><span class="nv"> </span><span class="s">else</span><span class="nv"> </span><span class="s">uat</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">(</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">'uat'</span><span class="nv"> </span><span class="s">)</span><span class="nv"> </span><span class="s">else</span><span class="nv"> </span><span class="s">prod</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">(</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">'prod'</span><span class="nv"> </span><span class="s">)</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+
+<ol>
+  <li>Create a list from another list with additional info</li>
+</ol>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Generate routes for DC1 PER01</span>
+    <span class="na">set_fact</span><span class="pi">:</span>
+      <span class="na">new_routes</span><span class="pi">:</span> <span class="pi">|</span>
+        <span class="s">{% set routes = [] %}</span>
+        <span class="s">{% for i in routes_to_add %}</span>
+        <span class="s">{% set _ = routes.append("router static vrf " + vrf|string + " address-family ipv4 unicast " + i + " " + bundle + "." + vlan|string + " " + firewall) %}</span>
+        <span class="s">{% endfor %}</span>
+        <span class="s">{{ routes }}</span>
+</code></pre></div></div>
+:ET

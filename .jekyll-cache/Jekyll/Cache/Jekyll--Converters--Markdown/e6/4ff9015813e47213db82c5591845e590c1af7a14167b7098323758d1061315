@@ -1,0 +1,7 @@
+I"U<h2 id="how-to-setup-inventory">How to setup inventory</h2>
+
+<h3 id="define-a-list-of-host-variables-in-ini-file">Define a list of host variables in INI file</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>oracle.lab.home  instances='["db1","db2","db3"]'
+</code></pre></div></div>
+
+:ET

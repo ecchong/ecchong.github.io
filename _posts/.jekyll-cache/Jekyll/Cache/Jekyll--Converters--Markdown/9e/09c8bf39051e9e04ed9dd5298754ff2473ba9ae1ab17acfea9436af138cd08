@@ -1,0 +1,22 @@
+I"J<h3 id="how-to-replace-a-substring-in-variable-with-regex">How to replace a substring in variable with regex</h3>
+
+<p>For example, we nee to reconstruct the path to the .vmx file of a VM.  The information is pull from vmware_guest_facts task into a list called hw_files.</p>
+
+<p>The list of strings look like this</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s2">"</span><span class="s">hw_files"</span><span class="err">:</span> <span class="pi">[</span>
+                <span class="s2">"</span><span class="s">[1node_vsan]</span><span class="nv"> </span><span class="s">bdf3125b-a135-fd6b-c56c-f44d3068826f/2-tet.vmx"</span><span class="pi">,</span>
+                <span class="s2">"</span><span class="s">[1node_vsan]</span><span class="nv"> </span><span class="s">bdf3125b-a135-fd6b-c56c-f44d3068826f/2-tet.nvram"</span><span class="pi">,</span>
+                <span class="s2">"</span><span class="s">[1node_vsan]</span><span class="nv"> </span><span class="s">bdf3125b-a135-fd6b-c56c-f44d3068826f/2-tet.vmsd"</span><span class="pi">,</span>
+                <span class="s2">"</span><span class="s">[1node_vsan]</span><span class="nv"> </span><span class="s">bdf3125b-a135-fd6b-c56c-f44d3068826f/2-tet.vmdk"</span>
+            <span class="pi">]</span>
+</code></pre></div></div>
+<p>We need to reconstruct the string into an actual file path that can be used in following tasks.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Set vmx file path</span>
+    <span class="na">set_fact</span><span class="pi">:</span>
+      <span class="na">vmx_path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">item</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">regex_replace</span><span class="nv"> </span><span class="s">('</span><span class="se">\\</span><span class="s">[(.*)</span><span class="se">\\</span><span class="s">]</span><span class="se">\\</span><span class="s">s*(.*</span><span class="se">\\</span><span class="s">.vmx)',</span><span class="nv"> </span><span class="s">'/vmfs/volumes/</span><span class="se">\\</span><span class="s">1/</span><span class="se">\\</span><span class="s">2')</span><span class="nv"> </span><span class="s">}}"</span>
+      <span class="na">lck_path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">item</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">regex_replace</span><span class="nv"> </span><span class="s">('</span><span class="se">\\</span><span class="s">[(.*)</span><span class="se">\\</span><span class="s">]</span><span class="se">\\</span><span class="s">s*(.*)</span><span class="se">\\</span><span class="s">.vmx',</span><span class="nv"> </span><span class="s">'/vmfs/volumes/</span><span class="se">\\</span><span class="s">1/</span><span class="se">\\</span><span class="s">2.lck')</span><span class="nv"> </span><span class="s">}}"</span>
+    <span class="na">when</span><span class="pi">:</span> <span class="s">item is match(".*\.vmx$") and inventory_hostname != esxi_host.name</span>
+    <span class="na">with_items</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">hw_files</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+:ET

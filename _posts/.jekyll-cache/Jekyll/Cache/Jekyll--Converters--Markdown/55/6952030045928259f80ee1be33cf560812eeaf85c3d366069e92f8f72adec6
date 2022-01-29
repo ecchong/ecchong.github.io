@@ -1,0 +1,43 @@
+I"b<h1 id="how-to-filter-hosts-on-tower-inventory-import">How to filter hosts on Tower inventory import</h1>
+<p>Some examples using filters when importing inventory from vCenter.  See the <a href="https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_vm_inventory_inventory.html">plugin doc</a> for details.</p>
+
+<h2 id="scenario-1">Scenario 1</h2>
+<ul>
+  <li>Import VMs in vCenter only with tag “import_to_inventory” under the categories “Test” and “Tower”</li>
+  <li>Put VMs into group name of the corresponding tag category</li>
+  <li>Import only the VMs that are powered on</li>
+  <li>Import VMs with the configured name (VMs are created without duplicate name in vCenter)</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">hostnames</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">config.name"</span><span class="pi">]</span>
+<span class="na">groups</span><span class="pi">:</span>
+  <span class="na">Tower</span><span class="pi">:</span> <span class="s2">"</span><span class="s">'Tower'</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">categories"</span>
+  <span class="na">Test</span><span class="pi">:</span> <span class="s2">"</span><span class="s">'Test'</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">categories"</span>
+<span class="na">with_tags</span><span class="pi">:</span> <span class="s">yes</span>
+<span class="na">filters</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">summary.runtime.powerState == "poweredOn"</span>
+<span class="pi">-</span> <span class="s2">"</span><span class="s">'import_to_inventory'</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">tags"</span>
+</code></pre></div></div>
+<p>Note:</p>
+<ul>
+  <li>Check host vars of imported host to see what variables are available for filtering</li>
+  <li>If using “properties” to selective import host vars, it must include the one used in filters</li>
+</ul>
+
+<h2 id="scenario-2">Scenario 2</h2>
+<ul>
+  <li>Import VMs under the “management” folder for datacenter “LAB”</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">hostnames</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">config.name"</span><span class="pi">]</span>
+<span class="na">with_tags</span><span class="pi">:</span> <span class="s">yes</span>
+<span class="na">resources</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="na">datacenter</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">LAB</span>
+  <span class="na">resources</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">folder</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">management"</span>
+</code></pre></div></div>
+:ET

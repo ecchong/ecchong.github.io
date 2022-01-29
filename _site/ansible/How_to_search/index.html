@@ -1,0 +1,792 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>How to search on Tower | Automate NYC!</title>
+<meta name="description" content="Some examples to use the search box in Tower to filter or create smart inventory  see (https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)[https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html] Find disabled hosts enabled:false   Find hosts with hostvar defined variables.icontains:myvar   Use as host filter on tower-cli tower-cli host list --host-filter &#39;variables__icontains=application&#39;   Find hosts with ansible facts equal a value ansible_facts.ansible_os_family:RedHat   Find hosts in organization organization.name:Default   Find hosts in a group belongs to an inventory First we need to find the group number using the api URL. For example, to list groups info for inventory id 18 https://tower-host.com/api/v2/inventories/18/groups/ Then use the group id in the filter groups:482   Find hosts in a group name from any inventory groups.name:mygroup   Find hosts that failed the last job has_active_failures:true  Find hosts by name name.startswith:dev name.exact:devhost4 name.istartwith:dev name.endswith:4 name.regex:^dev.*4$   Using the host filter on tower-cli tower-cli host list --host-filter name__endswith=80 -vvv tower-cli host list --host-filter name__startswith=RN tower-cli host list --host-filter &#39;name__regex=fedora[0-9]&#39; tower-cli host list --host-filter &#39;name__startswith=RN and name__regex=01$&#39;   Find dev hosts that are marked as ‘d’ on the 6th characters name.regex:^.{5}d   Find a template ID by name using curl curl -k -u john:secret https://192.168.0.101/api/v2/job_templates/?name=&#39;My Template&#39; | python3 -c &#39;import json,sys; print (json.load(sys.stdin)[&quot;results&quot;][0][&quot;id&quot;])&#39;   Find a template ID by name using tower-cli tower-cli job_template list --name &#39;Rolling Test&#39; --format id   No space in any search string.">
+
+
+  <meta name="author" content="Eric Chong">
+  
+  <meta property="article:author" content="Eric Chong">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Automate NYC!">
+<meta property="og:title" content="How to search on Tower">
+<meta property="og:url" content="http://localhost:4000/ansible/How_to_search/">
+
+
+  <meta property="og:description" content="Some examples to use the search box in Tower to filter or create smart inventory  see (https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)[https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html] Find disabled hosts enabled:false   Find hosts with hostvar defined variables.icontains:myvar   Use as host filter on tower-cli tower-cli host list --host-filter &#39;variables__icontains=application&#39;   Find hosts with ansible facts equal a value ansible_facts.ansible_os_family:RedHat   Find hosts in organization organization.name:Default   Find hosts in a group belongs to an inventory First we need to find the group number using the api URL. For example, to list groups info for inventory id 18 https://tower-host.com/api/v2/inventories/18/groups/ Then use the group id in the filter groups:482   Find hosts in a group name from any inventory groups.name:mygroup   Find hosts that failed the last job has_active_failures:true  Find hosts by name name.startswith:dev name.exact:devhost4 name.istartwith:dev name.endswith:4 name.regex:^dev.*4$   Using the host filter on tower-cli tower-cli host list --host-filter name__endswith=80 -vvv tower-cli host list --host-filter name__startswith=RN tower-cli host list --host-filter &#39;name__regex=fedora[0-9]&#39; tower-cli host list --host-filter &#39;name__startswith=RN and name__regex=01$&#39;   Find dev hosts that are marked as ‘d’ on the 6th characters name.regex:^.{5}d   Find a template ID by name using curl curl -k -u john:secret https://192.168.0.101/api/v2/job_templates/?name=&#39;My Template&#39; | python3 -c &#39;import json,sys; print (json.load(sys.stdin)[&quot;results&quot;][0][&quot;id&quot;])&#39;   Find a template ID by name using tower-cli tower-cli job_template list --name &#39;Rolling Test&#39; --format id   No space in any search string.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2020-01-23T00:00:00-05:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/ansible/How_to_search/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Eric Chong",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Automate NYC! Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Automate NYC!
+          <span class="site-subtitle">Let's automate that...</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/year-archive/">Posts</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/tags/">Tags</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+  
+    
+
+
+
+<nav class="breadcrumbs">
+  <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+    
+    
+    
+      
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="/" itemprop="item"><span itemprop="name">Home</span></a>
+
+          <meta itemprop="position" content="1" />
+        </li>
+        <span class="sep">/</span>
+      
+      
+        
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="/categories/#ansible" itemprop="item"><span itemprop="name">Ansible</span></a>
+          <meta itemprop="position" content="2" />
+        </li>
+        <span class="sep">/</span>
+      
+    
+      
+      
+        <li class="current">How to search on Tower</li>
+      
+    
+  </ol>
+</nav>
+
+  
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="http://localhost:4000/" itemprop="url">Eric Chong</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Ansible Automation Architect @ Red Hat</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">NYC</span>
+        </li>
+      
+
+      
+        
+          
+        
+          
+            <li><a href="https://www.automate.nyc" rel="nofollow noopener noreferrer me"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://www.linkedin.com/in/ericchong4linux/" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+  
+  </div>
+
+
+
+  <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="How to search on Tower">
+    <meta itemprop="description" content="Some examples to use the search box in Tower to filter or create smart inventorysee (https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)[https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html]Find disabled hostsenabled:falseFind hosts with hostvar definedvariables.icontains:myvarUse as host filter on tower-clitower-cli host list --host-filter &#39;variables__icontains=application&#39;Find hosts with ansible facts equal a valueansible_facts.ansible_os_family:RedHatFind hosts in organizationorganization.name:DefaultFind hosts in a group belongs to an inventoryFirst we need to find the group number using the api URL.For example, to list groups info for inventory id 18https://tower-host.com/api/v2/inventories/18/groups/Then use the group id in the filtergroups:482Find hosts in a group name from any inventorygroups.name:mygroupFind hosts that failed the last jobhas_active_failures:trueFind hosts by namename.startswith:devname.exact:devhost4name.istartwith:devname.endswith:4name.regex:^dev.*4$Using the host filter on tower-clitower-cli host list --host-filter name__endswith=80 -vvvtower-cli host list --host-filter name__startswith=RNtower-cli host list --host-filter &#39;name__regex=fedora[0-9]&#39;tower-cli host list --host-filter &#39;name__startswith=RN and name__regex=01$&#39;Find dev hosts that are marked as ‘d’ on the 6th charactersname.regex:^.{5}dFind a template ID by name using curlcurl -k -u john:secret https://192.168.0.101/api/v2/job_templates/?name=&#39;My Template&#39; | python3 -c &#39;import json,sys; print (json.load(sys.stdin)[&quot;results&quot;][0][&quot;id&quot;])&#39;Find a template ID by name using tower-clitower-cli job_template list --name &#39;Rolling Test&#39; --format idNo space in any search string.">
+    <meta itemprop="datePublished" content="2020-01-23T00:00:00-05:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title p-name" itemprop="headline">
+            <a href="http://localhost:4000/ansible/How_to_search/" class="u-url" itemprop="url">How to search on Tower
+</a>
+          </h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2020-01-23T00:00:00-05:00">January 23, 2020</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content e-content" itemprop="text">
+        
+        <h2 id="some-examples-to-use-the-search-box-in-tower-to-filter-or-create-smart-inventory">Some examples to use the search box in Tower to filter or create smart inventory</h2>
+
+<p>see (https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)[https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html]</p>
+<h3 id="find-disabled-hosts">Find disabled hosts</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>enabled:false
+</code></pre></div></div>
+
+<h3 id="find-hosts-with-hostvar-defined">Find hosts with hostvar defined</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>variables.icontains:myvar
+</code></pre></div></div>
+
+<h3 id="use-as-host-filter-on-tower-cli">Use as host filter on tower-cli</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tower-cli host list <span class="nt">--host-filter</span> <span class="s1">'variables__icontains=application'</span>
+</code></pre></div></div>
+
+<h3 id="find-hosts-with-ansible-facts-equal-a-value">Find hosts with ansible facts equal a value</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible_facts.ansible_os_family:RedHat
+</code></pre></div></div>
+
+<h3 id="find-hosts-in-organization">Find hosts in organization</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>organization.name:Default
+</code></pre></div></div>
+
+<h3 id="find-hosts-in-a-group-belongs-to-an-inventory">Find hosts in a group belongs to an inventory</h3>
+<p>First we need to find the group number using the api URL.
+For example, to list groups info for inventory id 18
+https://tower-host.com/api/v2/inventories/18/groups/
+Then use the group id in the filter</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">groups</span>:482
+</code></pre></div></div>
+
+<h3 id="find-hosts-in-a-group-name-from-any-inventory">Find hosts in a group name from any inventory</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>groups.name:mygroup
+</code></pre></div></div>
+
+<h3 id="find-hosts-that-failed-the-last-job">Find hosts that failed the last job</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>has_active_failures:true
+</code></pre></div></div>
+<h3 id="find-hosts-by-name">Find hosts by name</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>name.startswith:dev
+name.exact:devhost4
+name.istartwith:dev
+name.endswith:4
+name.regex:^dev.<span class="k">*</span>4<span class="err">$</span>
+</code></pre></div></div>
+
+<h3 id="using-the-host-filter-on-tower-cli">Using the host filter on tower-cli</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tower-cli host list <span class="nt">--host-filter</span> <span class="nv">name__endswith</span><span class="o">=</span>80 <span class="nt">-vvv</span>
+tower-cli host list <span class="nt">--host-filter</span> <span class="nv">name__startswith</span><span class="o">=</span>RN
+tower-cli host list <span class="nt">--host-filter</span> <span class="s1">'name__regex=fedora[0-9]'</span>
+tower-cli host list <span class="nt">--host-filter</span> <span class="s1">'name__startswith=RN and name__regex=01$'</span>
+</code></pre></div></div>
+
+<h3 id="find-dev-hosts-that-are-marked-as-d-on-the-6th-characters">Find dev hosts that are marked as ‘d’ on the 6th characters</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>name.regex:^.<span class="o">{</span>5<span class="o">}</span>d
+</code></pre></div></div>
+
+<h3 id="find-a-template-id-by-name-using-curl">Find a template ID by name using curl</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-k</span> <span class="nt">-u</span> john:secret https://192.168.0.101/api/v2/job_templates/?name<span class="o">=</span><span class="s1">'My Template'</span> | python3 <span class="nt">-c</span> <span class="s1">'import json,sys; print (json.load(sys.stdin)["results"][0]["id"])'</span>
+</code></pre></div></div>
+
+<h3 id="find-a-template-id-by-name-using-tower-cli">Find a template ID by name using tower-cli</h3>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tower-cli job_template list <span class="nt">--name</span> <span class="s1">'Rolling Test'</span> <span class="nt">--format</span> <span class="nb">id</span>
+</code></pre></div></div>
+
+<h3 id="no-space-in-any-search-string">No space in any search string.</h3>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/tags/#ansible" class="page__taxonomy-item p-category" rel="tag">Ansible</a><span class="sep">, </span>
+    
+      <a href="/tags/#search" class="page__taxonomy-item p-category" rel="tag">search</a><span class="sep">, </span>
+    
+      <a href="/tags/#tower" class="page__taxonomy-item p-category" rel="tag">Tower</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/categories/#ansible" class="page__taxonomy-item p-category" rel="tag">Ansible</a>
+    
+    </span>
+  </p>
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2020-01-23T00:00:00-05:00">January 23, 2020</time></p>
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?text=How+to+search+on+Tower%20http%3A%2F%2Flocalhost%3A4000%2Fansible%2FHow_to_search%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fansible%2FHow_to_search%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fansible%2FHow_to_search%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/ansible/How_to_search_activity_stream/" class="pagination--pager" title="How to search activity stream on Tower
+">Previous</a>
+    
+    
+      <a href="/ansible/How_to_inventory/" class="pagination--pager" title="How to setup inventory file
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h2 class="page__related-title">You may also enjoy</h2>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ansible/lab-ldap-for-aap/" rel="permalink">How to setup a lab LDAP for AAP controller and hub
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2022-01-17T00:00:00-05:00">January 17, 2022</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Automation Hub, LDAP and SSO
+Latest version of Automation Hub does not has built-in LDAP support.  Instead it relies on Red Hat SSO to provide integration wi...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ansible/create-new-ee/" rel="permalink">How to create a new execution environment
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2022-01-09T00:00:00-05:00">January 9, 2022</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Build a new EE image
+We would like to use a third part collection, in this case community.efficientip, in our playbooks. The collection is currently in the A...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ansible/deploy-aap-openshift-cli/" rel="permalink">How to deploy AAP 2.1 on OpenShift from CLI
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2021-12-07T00:00:00-05:00">December 7, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          less than 1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">How to deploy AAP 2.1 on OpenShift from CLI without Cluster Admin privileges (kind of)
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rhel/rhel-kisok/" rel="permalink">How to setup RHEL 8 to run as a kiosk
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2021-11-24T00:00:00-05:00">November 24, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">How to setup RHEL 8 to run as a kiosk
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Eric Chong. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'ecchong/ecchong.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnkyODU4NzQ2MDc=');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOEQoZr84CAbnV');
+    script.setAttribute('data-mapping', 'pathname');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

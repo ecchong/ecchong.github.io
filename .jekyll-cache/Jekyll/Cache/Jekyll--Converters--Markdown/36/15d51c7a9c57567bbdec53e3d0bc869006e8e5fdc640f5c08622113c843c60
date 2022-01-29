@@ -1,0 +1,60 @@
+I"<<h2 id="how-to-authenticate-with-server-and-retrieve-a-token--then-submit-a-json-file-via-rest-api">How to authenticate with server and retrieve a token.  Then submit a JSON file via REST API.</h2>
+
+<p>To login and obtain a token.  Then submit a payload file using the given token.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="pi">-</span> <span class="na">hosts</span><span class="pi">:</span> <span class="s">localhost</span>
+  <span class="na">gather_facts</span><span class="pi">:</span> <span class="s">no</span>
+  <span class="na">connection</span><span class="pi">:</span> <span class="s">local</span>
+
+  <span class="na">vars</span><span class="pi">:</span>
+    <span class="na">username</span><span class="pi">:</span> <span class="s">user1</span>
+    <span class="na">domain</span><span class="pi">:</span> <span class="s">dev</span>
+    <span class="na">auth_url</span><span class="pi">:</span> <span class="s">http://server1/SysInfo/auth/login</span>
+    <span class="na">api_url</span><span class="pi">:</span>  <span class="s">http://server1/SysInfo/api/hw/v1/</span>
+    <span class="na">json_file</span><span class="pi">:</span> <span class="s">payload.json</span>
+
+  <span class="na">vars_prompt</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">password</span>
+    <span class="na">prompt</span><span class="pi">:</span> <span class="s">password</span>
+  
+  <span class="na">tasks</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Set password</span>
+    <span class="na">set_fact</span><span class="pi">:</span>
+      <span class="na">login_info</span><span class="pi">:</span>
+        <span class="na">password</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">password</span><span class="nv"> </span><span class="s">}}'</span>
+        <span class="na">username</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">username</span><span class="nv"> </span><span class="s">}}'</span>
+        <span class="na">domain</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">domain</span><span class="nv"> </span><span class="s">}}'</span>
+    
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Get authentication token</span>
+    <span class="na">uri</span><span class="pi">:</span>
+      <span class="na">url</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">auth_url</span><span class="nv"> </span><span class="s">}}'</span>
+      <span class="na">method</span><span class="pi">:</span> <span class="s">POST</span>
+      <span class="na">headers</span><span class="pi">:</span>
+        <span class="na">Content-Type</span><span class="pi">:</span> <span class="s2">"</span><span class="s">application/json"</span>
+      <span class="na">body</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">login_info</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">to_json</span><span class="nv"> </span><span class="s">}}"</span>
+      <span class="na">body_format</span><span class="pi">:</span> <span class="s">json</span>
+      <span class="na">return_content</span><span class="pi">:</span> <span class="s">yes</span>
+      <span class="na">status_code</span><span class="pi">:</span> <span class="m">200</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">auth_token</span>
+
+  <span class="pi">-</span> <span class="na">debug</span><span class="pi">:</span>
+      <span class="na">msg</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">auth_token.json.token</span><span class="nv"> </span><span class="s">}}"</span>
+
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Submit payload</span>
+    <span class="na">uri</span><span class="pi">:</span>
+      <span class="na">url</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">api_url</span><span class="nv"> </span><span class="s">}}'</span>
+      <span class="na">method</span><span class="pi">:</span> <span class="s">POST</span>
+      <span class="na">headers</span><span class="pi">:</span>
+        <span class="na">Authorization</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Bearer</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">auth_token.json.token</span><span class="nv"> </span><span class="s">}}"</span>
+        <span class="na">Content-Type</span><span class="pi">:</span> <span class="s2">"</span><span class="s">application/json"</span>
+        <span class="na">Accept</span><span class="pi">:</span> <span class="s1">'</span><span class="s">*/*'</span>
+      <span class="na">body</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">lookup('file',</span><span class="nv"> </span><span class="s">'{{</span><span class="nv"> </span><span class="s">json_file</span><span class="nv"> </span><span class="s">}}')</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">replace('</span><span class="se">\n</span><span class="s">','')</span><span class="nv"> </span><span class="s">}}"</span>
+      <span class="na">body_format</span><span class="pi">:</span> <span class="s">json</span>
+      <span class="na">return_content</span><span class="pi">:</span> <span class="s">yes</span>
+      <span class="na">status_code</span><span class="pi">:</span> <span class="s">201,200</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">submit_output</span>
+</code></pre></div></div>
+
+<p>Noted that newer version of Tower (3.4) supported personal authentication token.  User can create a personal token via the GUI and use it in their scripts.</p>
+:ET

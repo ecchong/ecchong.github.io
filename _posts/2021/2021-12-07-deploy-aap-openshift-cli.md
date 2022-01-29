@@ -4,11 +4,13 @@ tags: ["openshift", "operator", "ansible", "aap" ]
 categories: Ansible
 category_archive: Ansible
 tag_archive: ["openshift", "operator", "ansible", "aap" ]
+last_modified_at: 2022-01-28
 ---
 
 # How to deploy AAP 2.1 on OpenShift from CLI without Cluster Admin privileges (kind of)
 
 - Ask Cluster Admin to assign the following permission to access the OperatorHub
+
 ```
 oc create clusterrolebinding user-aggregate-olm-view --clusterrole=aggregate-olm-view --user=myname
 ```
@@ -38,7 +40,7 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: ansible-automation-platform
-  namespace: ansible-automation-platform
+  namespace: myspace
 spec:
   channel: 'stable-2.1'
   installPlanApproval: Automatic
@@ -58,8 +60,8 @@ oc create -f subscription.yml
 apiVersion: automationcontroller.ansible.com/v1beta1
 kind: AutomationController
 metadata:
-  name: example
-  namespace: ansible-automation-platform
+  name: aap-controller
+  namespace: myspace
 spec:
   create_preload_data: true
   route_tls_termination_mechanism: Edge

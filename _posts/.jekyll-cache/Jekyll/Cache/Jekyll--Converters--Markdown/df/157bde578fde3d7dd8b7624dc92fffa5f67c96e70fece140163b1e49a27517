@@ -1,0 +1,12 @@
+I"Ã<h3 id="loops">Loops</h3>
+
+<p>https://chromatichq.com/blog/untangling-ansible-loops</p>
+
+<ul>
+  <li>with_items</li>
+  <li>with_subelements</li>
+  <li>with_dict</li>
+  <li>with_nested</li>
+</ul>
+
+:ET

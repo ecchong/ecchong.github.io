@@ -1,0 +1,80 @@
+I"�&<h2 id="find-vm-ip-address-when-not-on-the-defined-vm-network">Find VM IP address when not on the defined VM network</h2>
+<p>We deployed a KVM VM using macvtap connect directly to the physical network and getting a DHCP address.  How can we get the VM IP address from the hypervisor and use it in Ansible?</p>
+
+<p>First pull the interfaces information using <strong>virsh qemu-agent-command</strong>.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Get temporary dhcp address for eth0</span>
+    <span class="na">shell</span><span class="pi">:</span> <span class="s">virsh qemu-agent-command {{ inventory_hostname }} '{"execute":"guest-network-get-interfaces"}' | sed 's/-/_/g'</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">vm_interfaces</span>
+    <span class="na">delegate_to</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">libvirt_hypervisor_name</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+
+<p>The returned output uses “-“, therefore we need to do inline substitution with <strong>sed</strong>.  The final JSON output looks like this:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"return"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lo"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"ip-addresses"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"ip-address-type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ipv4"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"ip-address"</span><span class="p">:</span><span class="w"> </span><span class="s2">"127.0.0.1"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"prefix"</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"ip-address-type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ipv6"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"ip-address"</span><span class="p">:</span><span class="w"> </span><span class="s2">"::1"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"prefix"</span><span class="p">:</span><span class="w"> </span><span class="mi">128</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"statistics"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"tx-packets"</span><span class="p">:</span><span class="w"> </span><span class="mi">70</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"tx-errs"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"rx-bytes"</span><span class="p">:</span><span class="w"> </span><span class="mi">5856</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"rx-dropped"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"rx-packets"</span><span class="p">:</span><span class="w"> </span><span class="mi">70</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"rx-errs"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"tx-bytes"</span><span class="p">:</span><span class="w"> </span><span class="mi">5856</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"tx-dropped"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="nl">"hardware-address"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00:00:00:00"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eth0"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"ip-addresses"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"ip-address-type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ipv4"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"ip-address"</span><span class="p">:</span><span class="w"> </span><span class="s2">"192.168.0.187"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"prefix"</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"ip-address-type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ipv6"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"ip-address"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fe80::5054:ff:fe66:b8b0"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"prefix"</span><span class="p">:</span><span class="w"> </span><span class="mi">64</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"statistics"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"tx-packets"</span><span class="p">:</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"tx-errs"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"rx-bytes"</span><span class="p">:</span><span class="w"> </span><span class="mi">8456</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"rx-dropped"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"rx-packets"</span><span class="p">:</span><span class="w"> </span><span class="mi">57</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"rx-errs"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"tx-bytes"</span><span class="p">:</span><span class="w"> </span><span class="mi">5642</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"tx-dropped"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="nl">"hardware-address"</span><span class="p">:</span><span class="w"> </span><span class="s2">"52:54:00:66:b8:b0"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>We are only interested on the ipv4 address on eth0.  Use the following json_query to pull it into Ansible</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Get IP</span>
+    <span class="na">set_fact</span><span class="pi">:</span>
+      <span class="na">ip_address_list</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">interfaces.return</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">json_query(find_eth0)</span><span class="nv"> </span><span class="s">}}"</span>
+    <span class="na">vars</span><span class="pi">:</span>
+      <span class="na">find_eth0</span><span class="pi">:</span> <span class="s2">"</span><span class="s">[?name=='eth0'].ip_addresses[]</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">[?ip_address_type=='ipv4'].ip_address"</span>
+</code></pre></div></div>
+:ET

@@ -1,0 +1,20 @@
+I"Á<h3 id="lowest-precedence-to-hightest">Lowest precedence to hightest</h3>
+<ol>
+  <li>Role default variables</li>
+  <li>Inventory variables</li>
+  <li>Inventory group_vars variables:</li>
+  <li>Inventory host_vars variables:</li>
+  <li>group_vars variables defined in group_vars directory</li>
+  <li>host_vars variables defined in host_vars directory</li>
+  <li>Host facts</li>
+  <li>Registered variables</li>
+  <li>Variables defined via set_facts:</li>
+  <li>Variables defined with -a or â€“args</li>
+  <li>vars_prompt variables</li>
+  <li>Variables included using vars_files</li>
+  <li>role and include variables</li>
+  <li>Block variables</li>
+  <li>Task variables</li>
+  <li>extra variables</li>
+</ol>
+:ET

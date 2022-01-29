@@ -1,0 +1,20 @@
+I"X	<h2 id="create-user-with-shared-home">Create user with shared home</h2>
+<p>When /home is on a NFS mount, most likely the user home directory is already created from other hosts.  Use following steps to avoid error when creating user but not creating the home directory.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="na">tasks</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Check if user home directory already exists</span>
+    <span class="na">stat</span><span class="pi">:</span>
+      <span class="na">path</span><span class="pi">:</span> <span class="s">/home/{{ user }}</span>
+    <span class="na">register</span><span class="pi">:</span> <span class="s">user_home</span>
+
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create user but not home directory if already exists</span>
+    <span class="na">user</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">user</span><span class="nv"> </span><span class="s">}}"</span>
+      <span class="na">create_home</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">false</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">user_home.stat.exists</span><span class="nv"> </span><span class="s">else</span><span class="nv"> </span><span class="s">true</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+
+<p>Note that the inline Jinja2 statement does not work with ‘yes’ and ‘no’, e.g.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="na">create_home</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">no</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">user_home.stat.exists</span><span class="nv"> </span><span class="s">else</span><span class="nv"> </span><span class="s">yes</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+:ET

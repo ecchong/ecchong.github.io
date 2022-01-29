@@ -1,0 +1,62 @@
+I"‰<h3 id="how-to-sort-a-list-of-dict-objects">How to sort a list of dict objects</h3>
+
+<p>Example data from list of datastores from vCenter:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>        <span class="s2">"datastores"</span>: <span class="o">[</span>
+            <span class="o">{</span>
+                <span class="s2">"accessible"</span>: <span class="nb">true</span>,
+                <span class="s2">"capacity"</span>: 444797550592,
+                <span class="s2">"datastore_cluster"</span>: <span class="s2">"N/A"</span>,
+                <span class="s2">"freeSpace"</span>: 426470539264,
+                <span class="s2">"maintenanceMode"</span>: <span class="s2">"normal"</span>,
+                <span class="s2">"multipleHostAccess"</span>: <span class="nb">false</span>,
+                <span class="s2">"name"</span>: <span class="s2">"hqdev-esx1_local"</span>,
+                <span class="s2">"provisioned"</span>: 18327011328,
+                <span class="s2">"type"</span>: <span class="s2">"VMFS"</span>,
+                <span class="s2">"uncommitted"</span>: 0,
+                <span class="s2">"url"</span>: <span class="s2">"ds:///vmfs/volumes/524aa72f-de223a5e-b4f1-78e3b50b2d88/"</span>
+            <span class="o">}</span>,
+            <span class="o">{</span>
+                <span class="s2">"accessible"</span>: <span class="nb">true</span>,
+                <span class="s2">"capacity"</span>: 733634101248,
+                <span class="s2">"datastore_cluster"</span>: <span class="s2">"N/A"</span>,
+                <span class="s2">"freeSpace"</span>: 731786510336,
+                <span class="s2">"maintenanceMode"</span>: <span class="s2">"normal"</span>,
+                <span class="s2">"multipleHostAccess"</span>: <span class="nb">false</span>,
+                <span class="s2">"name"</span>: <span class="s2">"hqdev-esx2_local"</span>,
+                <span class="s2">"provisioned"</span>: 1847590912,
+                <span class="s2">"type"</span>: <span class="s2">"VMFS"</span>,
+                <span class="s2">"uncommitted"</span>: 0,
+                <span class="s2">"url"</span>: <span class="s2">"ds:///vmfs/volumes/530f0ac5-1366daac-9611-ac162db1d8c0/"</span>
+            <span class="o">}</span>,
+            <span class="o">{</span>
+                <span class="s2">"accessible"</span>: <span class="nb">true</span>,
+                <span class="s2">"capacity"</span>: 2198754820096,
+                <span class="s2">"datastore_cluster"</span>: <span class="s2">"3PAR7200TempMigrationAreaNL"</span>,
+                <span class="s2">"freeSpace"</span>: 1371663237120,
+                <span class="s2">"maintenanceMode"</span>: <span class="s2">"normal"</span>,
+                <span class="s2">"multipleHostAccess"</span>: <span class="nb">true</span>,
+                <span class="s2">"name"</span>: <span class="s2">"vmfs-3par7200-tempdev-ds1"</span>,
+                <span class="s2">"provisioned"</span>: 1561292056309,
+                <span class="s2">"type"</span>: <span class="s2">"VMFS"</span>,
+                <span class="s2">"uncommitted"</span>: 734200473333,
+                <span class="s2">"url"</span>: <span class="s2">"ds:///vmfs/volumes/5a6b821b-647c8196-cfaa-78e3b50b2d88/"</span>
+            <span class="o">}</span>,
+        <span class="o">]</span>
+</code></pre></div></div>
+
+<p>We want to sort the list of datastores by the available freeSpace</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Print the list of datastores sorted by freeSpace</span>
+    <span class="na">debug</span><span class="pi">:</span>
+      <span class="na">msg</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">datastore_facts.datastores</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">sort(attribute='freeSpace')</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+
+<p>How about just the one with most freeSpace?  Reverse the sort and first item is the one with most freeSpace.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Print the list of datastores sorted by freeSpace</span>
+    <span class="na">debug</span><span class="pi">:</span>
+      <span class="na">msg</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">datastore_facts.datastores</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">sort(attribute='freeSpace',</span><span class="nv"> </span><span class="s">reverse=true)</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">list</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">first</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+
+:ET

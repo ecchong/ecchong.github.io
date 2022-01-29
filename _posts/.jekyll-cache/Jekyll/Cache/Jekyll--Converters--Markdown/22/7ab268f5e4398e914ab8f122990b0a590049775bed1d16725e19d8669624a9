@@ -1,0 +1,36 @@
+I"p<h2 id="oracle-sqlcl-sqlformat">Oracle SQLcl sqlformat</h2>
+
+<ul>
+  <li>Set display format</li>
+</ul>
+
+<pre><code class="language-SQL">SQL&gt; set sqlformat ansiconsole;
+SQL&gt; select owner, table_name from all_tables where owner LIKE 'HR%';
+OWNER  TABLE_NAME
+HR     REGIONS
+HR     COUNTRIES
+HR     LOCATIONS
+HR     DEPARTMENTS
+HR     JOBS
+HR     EMPLOYEES
+HR     JOB_HISTORY
+
+SQL&gt; set sqlformat csv;
+SQL&gt; select owner, table_name from all_tables where owner LIKE 'HR%';
+"OWNER","TABLE_NAME"
+"HR","REGIONS"
+"HR","COUNTRIES"
+"HR","LOCATIONS"
+"HR","DEPARTMENTS"
+"HR","JOBS"
+"HR","EMPLOYEES"
+"HR","JOB_HISTORY"
+
+SQL&gt; set sqlformat json;
+SQL&gt; select owner, table_name from all_tables where owner LIKE 'HR%';
+{"results":[{"columns":[{"name":"OWNER","type":"NUMBER"},{"name":"TABLE_NAME","type":"NUMBER"}],"items":
+[
+{"owner":"HR","table_name":"REGIONS"},{"owner":"HR","table_name":"COUNTRIES"},{"owner":"HR","table_name":"LOCATIONS"},{"owner":"HR","table_name":"DEPARTMENTS"},{"owner":"HR","table_name":"JOBS"},{"owner":"HR","table_name":"EMPLOYEES"},{"owner":"HR","table_name":"JOB_HISTORY"}]}]}
+7 rows selected.
+</code></pre>
+:ET

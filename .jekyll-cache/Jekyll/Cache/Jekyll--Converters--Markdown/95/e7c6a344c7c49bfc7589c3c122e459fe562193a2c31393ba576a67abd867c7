@@ -1,0 +1,34 @@
+I"�<h3 id="how-to-use-different-ssh-keys-for-different-git-repos">How to use different SSH keys for different Git repos</h3>
+
+<p>Each Git repo is assigned with it’s own deploy key.  We can configure the .ssh/config file to use different keys for each repo.  Modify the config file “Host” field with a unique name, e.g. adding “-repo_name” after the hostname.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>more ~/.ssh/config
+Host github.com-Role1
+   User ecchong
+   IdentityFile ~/.ssh/github_deploy_key_1
+   StrictHostKeyChecking no
+   HostName github.com
+
+Host github.com-Role2
+   User ecchong
+   IdentityFile ~/.ssh/github_deploy_key_2
+   StrictHostKeyChecking no
+   HostName github.com
+</code></pre></div></div>
+
+<p>In the requirements.yml file, append the same identifier string after server name.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>more requirements.yml
+- src: git@github.com-Role1:ecchong/Role1.git
+  scm: git
+  version: master
+
+- src: git@github.com-Role2:ecchong/Role2.git
+  scm: git
+  version: master
+</code></pre></div></div>
+<p>Now running “ansible-galaxy” should pull both repoes using it’s own key</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible-galaxy <span class="nb">install</span> <span class="nt">-r</span> requirements.yml <span class="nt">-p</span> roles
+</code></pre></div></div>
+<p><a href="https://medium.com/@xiaolishen/use-multiple-ssh-keys-for-different-github-accounts-on-the-same-computer-7d7103ca8693">Reference</a></p>
+:ET

@@ -1,0 +1,108 @@
+I"�<h2 id="how-to-expand-a-variables-using-jinja2-template">How to expand a variables using Jinja2 template</h2>
+
+<p>Problem:
+We want to generate a list of VMs and past it to our VM creation role that will take a list as input.  Each VM in the list could be a little different, for example, different disk size or definitely different IP address.  A loop or with_item won’t be able to do that. Jinja2 template can do that, but we don’t want to generate a vars file before executing the VM creation role.</p>
+
+<p>We will use lookup template plugin to generate a var from our Jinja2 template during runtime.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="na">vars_files</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">common_vars_for_all_vms.yml</span>
+
+  <span class="na">vars</span><span class="pi">:</span>
+    <span class="na">run_vars</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">lookup('template','custom_vms.j2')</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">from_yaml</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Store all variables that are common in a separated vars file and import it before Jinja2 file is parsed.</li>
+  <li>Lookup returns a string and need to specfied as a yaml format.  Also need to verify the template is generating valid yaml format</li>
+  <li>Assign it to a variable and now it becomes a dict that we can use</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create all availability sets</span>
+    <span class="na">include_role</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">av_set</span>
+    <span class="na">vars</span><span class="pi">:</span>
+      <span class="na">av_set</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">run_vars.av_set</span><span class="nv"> </span><span class="s">}}"</span>
+
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create all VMs</span>
+    <span class="na">include_role</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">vm</span>
+    <span class="na">vars</span><span class="pi">:</span>
+      <span class="na">vm</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">run_vars.vm</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+
+<p>This is what in the custom_vms.j2</p>
+
+<pre><code class="language-jinja2">av_set:
+{% for func in func_list %}
+{% if func.use_av %}
+- name: "{{ prefix }}{{ env }}-{{ func.name }}"
+  resource_group: "{{ prefix }}{{ env }}-{{ func.name }}"
+  location: "{{ location }}"
+  fault_domain_count: 3
+  update_domain_count: 2
+  tags: "{{ tags }}"
+{% endif %}
+{% endfor %}
+
+vm:
+{% set x = [] %}
+{% for func in func_list %}
+{% for i in range(func.count) %}
+- name: "{{ prefix }}{{ env }}{{ func.name }}{{ i+1 }}"
+  resource_group: "{{ prefix }}{{ env }}-{{ func.name }}"
+{% if func.use_av %}
+  av_set: "{{ prefix }}{{ env }}-{{ func.name }}"
+{% endif %}
+  size: "{{ size }}"
+  location: "{{ location }}"
+  admin_username: "{{ admin_username }}"
+  admin_password: "{{ admin_password }}"
+  ip_address: {{ starting_ip | ipmath( x | length - 1 ) }}
+{% if x.append('1') %}{% endif %}
+  managed_disk_type: "{{ managed_disk_type }}"
+  os_style: Windows
+  image: "{{ windows_image }}"
+  tags: "{{ tags }}"
+{% endfor %}
+{% endfor %}
+</code></pre>
+
+<p>This is what in the common_vars_for_all_vms.yml</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">subscription_id</span><span class="pi">:</span> <span class="s">put_you_own_here</span>
+<span class="na">prefix</span><span class="pi">:</span> <span class="s">dev</span>
+<span class="na">env</span><span class="pi">:</span> <span class="s">et</span>
+
+<span class="na">size</span><span class="pi">:</span> <span class="s">Standard_DS2v3</span>
+<span class="na">location</span><span class="pi">:</span> <span class="s">eastus2</span>
+<span class="na">admin_username</span><span class="pi">:</span> <span class="s">administrator</span>
+<span class="na">admin_password</span><span class="pi">:</span> <span class="s">some_vaulted_secret</span>
+<span class="na">windows_image</span><span class="pi">:</span>
+  <span class="na">offer</span><span class="pi">:</span> <span class="s">WindowsServer</span>
+  <span class="na">publisher</span><span class="pi">:</span> <span class="s">MicrosoftWindowsServer</span>
+  <span class="na">version</span><span class="pi">:</span> <span class="s">latest</span>
+  <span class="na">sku</span><span class="pi">:</span> <span class="s1">'</span><span class="s">2012-R2-Datacenter'</span>
+<span class="na">tags</span><span class="pi">:</span>
+  <span class="na">project</span><span class="pi">:</span> <span class="s2">"</span><span class="s">development"</span>
+<span class="na">managed_disk_type</span><span class="pi">:</span> <span class="s">Standard_LRS</span>
+<span class="na">virtualnetwork</span><span class="pi">:</span>
+  <span class="na">resourcegroup</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">prefix</span><span class="nv"> </span><span class="s">}}{{</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">}}-gateway"</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">prefix</span><span class="nv"> </span><span class="s">}}{{</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">}}-vnet"</span>
+  <span class="na">prefix</span><span class="pi">:</span> <span class="s2">"</span><span class="s">10.0.0.0/24"</span>
+  <span class="na">subnet</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">prefix</span><span class="nv"> </span><span class="s">}}{{</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">}}-subnet"</span>
+    <span class="na">prefix</span><span class="pi">:</span> <span class="s2">"</span><span class="s">10.0.0.0/24"</span>
+<span class="na">starting_ip</span><span class="pi">:</span> <span class="s">10.0.0.100</span>
+<span class="na">func_list</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">db</span>
+  <span class="na">count</span><span class="pi">:</span> <span class="m">2</span>
+  <span class="na">use_av</span><span class="pi">:</span> <span class="no">true</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">ap</span>
+  <span class="na">count</span><span class="pi">:</span> <span class="m">2</span>
+  <span class="na">use_av</span><span class="pi">:</span> <span class="no">true</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">fs</span>
+  <span class="na">count</span><span class="pi">:</span> <span class="m">1</span>
+  <span class="na">use_av</span><span class="pi">:</span> <span class="no">false</span>
+</code></pre></div></div>
+:ET

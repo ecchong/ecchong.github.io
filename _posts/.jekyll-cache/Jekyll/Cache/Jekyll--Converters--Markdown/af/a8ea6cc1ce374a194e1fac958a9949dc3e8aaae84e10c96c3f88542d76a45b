@@ -1,0 +1,10 @@
+I"�<h2 id="setup-tower-notification-for-ms-teams">Setup Tower notification for MS Teams</h2>
+
+<p><a href="https://github.com/ansible/awx/issues/885">https://github.com/ansible/awx/issues/885</a></p>
+
+<ul>
+  <li>In MS Team channel, go to More Options -&gt; Connectors.  Configure “Incoming Webhook”.  Assign a name and create.</li>
+  <li>Copy the generated URL.</li>
+  <li>Create a Tower Notification using Mattermost type.  Paste the Team Webhook URL into TARGET URL</li>
+</ul>
+:ET

@@ -1,0 +1,33 @@
+I"–<h3 id="use--or--sign">Use | or &gt; sign</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td>Use</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Preserves line returns within string:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">include_newlines</span><span class="pi">:</span> <span class="pi">|</span>
+         <span class="s">Example Company</span>
+         <span class="s">123 Main Street</span>
+         <span class="s">Atlanta, GA 30303</span>
+</code></pre></div></div>
+<p>Use &gt;</p>
+
+<p>Converts line returns to spaces. Removes leading white spaces in lines</p>
+
+<p>Use to break long strings at space characters
+Spanning multiple lines promotes better readability</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">fold_newlines</span><span class="pi">:</span> <span class="pi">&gt;</span>
+          <span class="s">This is</span>
+          <span class="s">a very long,</span>
+          <span class="s">long, long, long</span>
+          <span class="s">sentence.</span>
+</code></pre></div></div>
+<p>There are two ways to write multiline strings. One method uses the vertical bar character to denote that line returns within the string must be preserved, as shown in the first example here.</p>
+
+<p>The second method uses the greater-than character to indicate that line returns in the strong are to be converted to spaces and that leading white spaces in the lines are to be removed, as shown in the second example here. This method is often used to break long strings at space characters so that they can span multiple lines for better readability.</p>
+:ET

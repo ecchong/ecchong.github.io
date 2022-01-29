@@ -1,0 +1,898 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>How to setup a lab LDAP for AAP controller and hub | Automate NYC!</title>
+<meta name="description" content="Automation Hub, LDAP and SSO Latest version of Automation Hub does not has built-in LDAP support.  Instead it relies on Red Hat SSO to provide integration with the LDAP authentication.  Fortunately the AAP installation playbooks will assist setting up the SSO application on a separate VM with Automation Hub.">
+
+
+  <meta name="author" content="Eric Chong">
+  
+  <meta property="article:author" content="Eric Chong">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Automate NYC!">
+<meta property="og:title" content="How to setup a lab LDAP for AAP controller and hub">
+<meta property="og:url" content="http://localhost:4000/ansible/lab-ldap-for-aap/">
+
+
+  <meta property="og:description" content="Automation Hub, LDAP and SSO Latest version of Automation Hub does not has built-in LDAP support.  Instead it relies on Red Hat SSO to provide integration with the LDAP authentication.  Fortunately the AAP installation playbooks will assist setting up the SSO application on a separate VM with Automation Hub.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2022-01-17T00:00:00-05:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/ansible/lab-ldap-for-aap/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Eric Chong",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Automate NYC! Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Automate NYC!
+          <span class="site-subtitle">Let's automate that...</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/year-archive/">Posts</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/tags/">Tags</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+  
+    
+
+
+
+<nav class="breadcrumbs">
+  <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+    
+    
+    
+      
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="/" itemprop="item"><span itemprop="name">Home</span></a>
+
+          <meta itemprop="position" content="1" />
+        </li>
+        <span class="sep">/</span>
+      
+      
+        
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="/categories/#ansible" itemprop="item"><span itemprop="name">Ansible</span></a>
+          <meta itemprop="position" content="2" />
+        </li>
+        <span class="sep">/</span>
+      
+    
+      
+      
+        <li class="current">How to setup a lab LDAP for AAP controller and hub</li>
+      
+    
+  </ol>
+</nav>
+
+  
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="http://localhost:4000/" itemprop="url">Eric Chong</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Ansible Automation Architect @ Red Hat</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">NYC</span>
+        </li>
+      
+
+      
+        
+          
+        
+          
+            <li><a href="https://www.automate.nyc" rel="nofollow noopener noreferrer me"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://www.linkedin.com/in/ericchong4linux/" rel="nofollow noopener noreferrer me"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+  
+  </div>
+
+
+
+  <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="How to setup a lab LDAP for AAP controller and hub">
+    <meta itemprop="description" content="Automation Hub, LDAP and SSOLatest version of Automation Hub does not has built-in LDAP support.  Instead it relies on Red Hat SSO to provide integration with the LDAP authentication.  Fortunately the AAP installation playbooks will assist setting up the SSO application on a separate VM with Automation Hub.">
+    <meta itemprop="datePublished" content="2022-01-17T00:00:00-05:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title p-name" itemprop="headline">
+            <a href="http://localhost:4000/ansible/lab-ldap-for-aap/" class="u-url" itemprop="url">How to setup a lab LDAP for AAP controller and hub
+</a>
+          </h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2022-01-17T00:00:00-05:00">January 17, 2022</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content e-content" itemprop="text">
+        
+        <h1 id="automation-hub-ldap-and-sso">Automation Hub, LDAP and SSO</h1>
+<p>Latest version of Automation Hub does not has built-in LDAP support.  Instead it relies on Red Hat SSO to provide integration with the LDAP authentication.  Fortunately the AAP installation playbooks will assist setting up the SSO application on a separate VM with Automation Hub.</p>
+
+<h2 id="openldap">Openldap</h2>
+<p>First we will need a simple LDAP server.  We will be using Osixia OpenLDAP container image.</p>
+
+<p>Create a <code class="language-plaintext highlighter-rouge">Containerfile</code>:</p>
+<div class="language-docker highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">FROM</span><span class="s"> docker.io/osixia/openldap:latest</span>
+
+<span class="k">LABEL</span><span class="s"> maintainer="echong@redhat.com"</span>
+
+<span class="k">ENV</span><span class="s"> LDAP_ORGANISATION="Lab" \</span>
+    LDAP_DOMAIN="automate.nyc"
+
+<span class="k">COPY</span><span class="s"> bootstrap.ldif /container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif</span>
+</code></pre></div></div>
+
+<p>Create the bootstrap.ldif to preload the image with OUs, users and groups:</p>
+<pre><code class="language-ldif">dn: ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=automate,dc=nyc
+changetype: add
+objectClass: organizationalUnit
+ou: groups
+
+dn: uid=bbanner,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: The Hulk
+givenName: Bruce
+sn: Banner
+cn: Bruce Banner
+uid: bbanner
+mail: bbanner@automate.nyc
+userpassword: secret_password
+
+dn: uid=cbarton,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Hawkeye
+givenName: Clint
+sn: barton
+cn: Clint Barton
+uid: cbarton
+mail: cbarton@automate.nyc
+userpassword: secret_password
+
+... &lt;-- skipping the rest of the super heroes here
+</code></pre>
+<!--
+dn: uid=slang,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Ant Man
+givenName: Scott
+sn: Lang
+cn: Scott Lang
+uid: slang
+mail: slang@automate.nyc
+userpassword: secret_password
+
+dn: uid=tstark,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Iron Man
+givenName: Tony
+sn: Stark
+cn: Tony Stark
+uid: tstark
+mail: tstart@automate.nyc
+userpassword: secret_password
+
+dn: uid=cdanvers,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Captain Marvel
+givenName: Carol
+sn: Danvers
+cn: Carol Davers
+uid: cdanvers
+mail: cdanvers@automate.nyc
+userpassword: secret_password
+
+dn: uid=echong,ou=people,dc=automate,dc=nyc
+changetype: add
+objectClass: inetOrgPerson
+description: Eric Chong the admin
+givenName: Eric
+sn: Chong
+cn: Eric Chong
+uid: echong
+mail: echong@redhat.com
+userpassword: secret_password
+-->
+<pre><code class="language-ldif">dn: cn=admins,ou=groups,dc=automate,dc=nyc
+changetype: add
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: admins
+uniqueMember: uid=bbanner,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=echong,ou=people,dc=automate,dc=nyc
+
+dn: cn=operators,ou=groups,dc=automate,dc=nyc
+changetype: add
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: operators
+uniqueMember: uid=cbarton,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=tstark,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=cdanvers,ou=people,dc=automate,dc=nyc
+uniqueMember: uid=slang,ou=people,dc=automate,dc=nyc
+</code></pre>
+
+<p>Build the image with the LDAP data:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>podman build <span class="nt">--tag</span> localhost/openldap:withdata <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>Start the container as root, since we are using privilege port 389:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>podman run <span class="se">\</span>
+   <span class="nt">--name</span> openldap <span class="se">\</span>
+   <span class="nt">--env</span> <span class="nv">LDAP_ORGANISATION</span><span class="o">=</span><span class="s2">"Lab"</span> <span class="se">\</span>
+   <span class="nt">--env</span> <span class="nv">LDAP_DOMAIN</span><span class="o">=</span><span class="s2">"automate.nyc"</span> <span class="se">\</span>
+   <span class="nt">--env</span> <span class="nv">LDAP_ADMIN_PASSWORD</span><span class="o">=</span><span class="s2">"test1234"</span> <span class="se">\</span>
+   <span class="nt">-p</span> 389:389 <span class="se">\</span>
+   <span class="nt">--detach</span> localhost/openldap:withdata
+</code></pre></div></div>
+
+<p>Bonus.  We can also start the <code class="language-plaintext highlighter-rouge">phpldapadmin</code> GUI in a second container:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>podman run <span class="nt">-p</span> 8090:80 <span class="se">\</span>
+   <span class="nt">--name</span> phpldapadmin <span class="se">\</span>
+   <span class="nt">--env</span> <span class="nv">PHPLDAPADMIN_LDAP_HOSTS</span><span class="o">=</span>192.168.1.209 <span class="se">\</span>
+   <span class="nt">--env</span> <span class="nv">PHPLDAPADMIN_HTTPS</span><span class="o">=</span><span class="s1">'false'</span> <span class="se">\</span>
+   <span class="nt">--detach</span> docker.io/osixia/phpldapadmin:0.9.0
+</code></pre></div></div>
+
+<p>Test the connection from AAP servers using <code class="language-plaintext highlighter-rouge">ldapsearch</code> command:</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ldapsearch <span class="nt">-x</span> <span class="nt">-v</span> <span class="nt">-b</span> <span class="s1">'dc=automate,dc=nyc'</span> <span class="nt">-H</span> ldap://192.168.1.209:389 <span class="se">\</span>
+<span class="nt">-D</span> <span class="s1">'cn=admin,dc=automate,dc=nyc'</span> <span class="nt">-w</span> test1234 <span class="nt">-LLL</span>
+</code></pre></div></div>
+
+<h2 id="automation-hub-and-sso-servers">Automation Hub and SSO servers</h2>
+<p>Update the <code class="language-plaintext highlighter-rouge">inventory</code> file with additional information for setting SSO server.</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[sso]</span>
+<span class="err">aap-sso.lab.automate.nyc</span>
+
+<span class="nn">[all:vars]</span>
+<span class="err">sso_keystore_password:</span> <span class="err">secret_password</span>
+<span class="err">sso_console_admin_password:</span> <span class="err">secret_password</span>
+</code></pre></div></div>
+
+<p>Now run AAP installation script <code class="language-plaintext highlighter-rouge">setup.sh</code> to install SSO on the assigned server and setup the Automation Hub to use the SSO server for authentication.</p>
+
+<p>See <a href="https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.1/html/installing_and_configuring_central_authentication_for_the_ansible_automation_platform">Installing and Configuring Central Authentication for the Ansible Automation Platform</a></p>
+
+<p>My final SSO setting: <img src="/assets/images/2022/2022-01-17-sso-settings.png" alt="SSO Setting" /></p>
+
+<p>My user role mapping setting: <img src="/assets/images/2022/2022-01-17-sso-user-role-mapping.png" alt="User Role Mapping" /></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/tags/#aap" class="page__taxonomy-item p-category" rel="tag">aap</a><span class="sep">, </span>
+    
+      <a href="/tags/#ansible" class="page__taxonomy-item p-category" rel="tag">ansible</a><span class="sep">, </span>
+    
+      <a href="/tags/#automation-hub" class="page__taxonomy-item p-category" rel="tag">Automation Hub</a><span class="sep">, </span>
+    
+      <a href="/tags/#container" class="page__taxonomy-item p-category" rel="tag">container</a><span class="sep">, </span>
+    
+      <a href="/tags/#docker" class="page__taxonomy-item p-category" rel="tag">docker</a><span class="sep">, </span>
+    
+      <a href="/tags/#ldap" class="page__taxonomy-item p-category" rel="tag">LDAP</a><span class="sep">, </span>
+    
+      <a href="/tags/#openldap" class="page__taxonomy-item p-category" rel="tag">OpenLDAP</a><span class="sep">, </span>
+    
+      <a href="/tags/#podman" class="page__taxonomy-item p-category" rel="tag">podman</a><span class="sep">, </span>
+    
+      <a href="/tags/#tower" class="page__taxonomy-item p-category" rel="tag">Tower</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/categories/#ansible" class="page__taxonomy-item p-category" rel="tag">Ansible</a>
+    
+    </span>
+  </p>
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2022-01-17T00:00:00-05:00">January 17, 2022</time></p>
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?text=How+to+setup+a+lab+LDAP+for+AAP+controller+and+hub%20http%3A%2F%2Flocalhost%3A4000%2Fansible%2Flab-ldap-for-aap%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fansible%2Flab-ldap-for-aap%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fansible%2Flab-ldap-for-aap%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/ansible/create-new-ee/" class="pagination--pager" title="How to create a new execution environment
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h2 class="page__related-title">You may also enjoy</h2>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ansible/create-new-ee/" rel="permalink">How to create a new execution environment
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2022-01-09T00:00:00-05:00">January 9, 2022</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Build a new EE image
+We would like to use a third part collection, in this case community.efficientip, in our playbooks. The collection is currently in the A...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ansible/deploy-aap-openshift-cli/" rel="permalink">How to deploy AAP 2.1 on OpenShift from CLI
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2021-12-07T00:00:00-05:00">December 7, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          less than 1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">How to deploy AAP 2.1 on OpenShift from CLI without Cluster Admin privileges (kind of)
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rhel/rhel-kisok/" rel="permalink">How to setup RHEL 8 to run as a kiosk
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2021-11-24T00:00:00-05:00">November 24, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">How to setup RHEL 8 to run as a kiosk
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ansible/inventory-filter/" rel="permalink">How to filter hosts on Tower inventory import
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2021-07-01T00:00:00-04:00">July 1, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          less than 1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">How to filter hosts on Tower inventory import
+Some examples using filters when importing inventory from vCenter.  See the plugin doc for details.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Eric Chong. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'ecchong/ecchong.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnkyODU4NzQ2MDc=');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOEQoZr84CAbnV');
+    script.setAttribute('data-mapping', 'pathname');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>
