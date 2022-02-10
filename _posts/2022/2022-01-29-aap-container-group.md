@@ -126,3 +126,5 @@ Create a new Execution Environment to point to the custom image on Quay.io acces
 ![AAP Custom Execution Environment](/assets/images/2022/2022-01-29-custom-ee.png)
 
 Last step is to update the Job Template using the OpenShift Sandbox Container Group to use this execution environment.  Now lauch the template and a new pod will be deployed on the Sandbox and using your customer execution environment from Quay.io.
+
+P.S. While writing this,  [Ansible blog @ ansible.com/blog](https://www.ansible.com/blog/on-demand-execution-with-red-hat-openshift) pusblished a similar article.  Please check that out too!
