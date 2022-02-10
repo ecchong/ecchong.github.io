@@ -2,11 +2,13 @@
 title: How to search on Tower
 tags: ["Ansible", "Tower", "search"]
 categories: Ansible
-
+last_modified_at: 2022-02-10
 ---
 ## Some examples to use the search box in Tower to filter or create smart inventory
 
-see (https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)[https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html]
+see [Automation Controller API Guide - Filtering](https://docs.ansible.com/automation-controller/latest/html/controllerapi/filtering.html)
+
+old URL [https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html](https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)
 ### Find disabled hosts
 ```bash
 enabled:false

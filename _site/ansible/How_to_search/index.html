@@ -10,7 +10,7 @@
     <meta charset="utf-8">
 
 <!-- begin _includes/seo.html --><title>How to search on Tower | Automate NYC!</title>
-<meta name="description" content="Some examples to use the search box in Tower to filter or create smart inventory  see (https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)[https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html] Find disabled hosts enabled:false   Find hosts with hostvar defined variables.icontains:myvar   Use as host filter on tower-cli tower-cli host list --host-filter &#39;variables__icontains=application&#39;   Find hosts with ansible facts equal a value ansible_facts.ansible_os_family:RedHat   Find hosts in organization organization.name:Default   Find hosts in a group belongs to an inventory First we need to find the group number using the api URL. For example, to list groups info for inventory id 18 https://tower-host.com/api/v2/inventories/18/groups/ Then use the group id in the filter groups:482   Find hosts in a group name from any inventory groups.name:mygroup   Find hosts that failed the last job has_active_failures:true  Find hosts by name name.startswith:dev name.exact:devhost4 name.istartwith:dev name.endswith:4 name.regex:^dev.*4$   Using the host filter on tower-cli tower-cli host list --host-filter name__endswith=80 -vvv tower-cli host list --host-filter name__startswith=RN tower-cli host list --host-filter &#39;name__regex=fedora[0-9]&#39; tower-cli host list --host-filter &#39;name__startswith=RN and name__regex=01$&#39;   Find dev hosts that are marked as ‘d’ on the 6th characters name.regex:^.{5}d   Find a template ID by name using curl curl -k -u john:secret https://192.168.0.101/api/v2/job_templates/?name=&#39;My Template&#39; | python3 -c &#39;import json,sys; print (json.load(sys.stdin)[&quot;results&quot;][0][&quot;id&quot;])&#39;   Find a template ID by name using tower-cli tower-cli job_template list --name &#39;Rolling Test&#39; --format id   No space in any search string.">
+<meta name="description" content="Some examples to use the search box in Tower to filter or create smart inventory  see Automation Controller API Guide - Filtering  old URL https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html Find disabled hosts enabled:false   Find hosts with hostvar defined variables.icontains:myvar   Use as host filter on tower-cli tower-cli host list --host-filter &#39;variables__icontains=application&#39;   Find hosts with ansible facts equal a value ansible_facts.ansible_os_family:RedHat   Find hosts in organization organization.name:Default   Find hosts in a group belongs to an inventory First we need to find the group number using the api URL. For example, to list groups info for inventory id 18 https://tower-host.com/api/v2/inventories/18/groups/ Then use the group id in the filter groups:482   Find hosts in a group name from any inventory groups.name:mygroup   Find hosts that failed the last job has_active_failures:true  Find hosts by name name.startswith:dev name.exact:devhost4 name.istartwith:dev name.endswith:4 name.regex:^dev.*4$   Using the host filter on tower-cli tower-cli host list --host-filter name__endswith=80 -vvv tower-cli host list --host-filter name__startswith=RN tower-cli host list --host-filter &#39;name__regex=fedora[0-9]&#39; tower-cli host list --host-filter &#39;name__startswith=RN and name__regex=01$&#39;   Find dev hosts that are marked as ‘d’ on the 6th characters name.regex:^.{5}d   Find a template ID by name using curl curl -k -u john:secret https://192.168.0.101/api/v2/job_templates/?name=&#39;My Template&#39; | python3 -c &#39;import json,sys; print (json.load(sys.stdin)[&quot;results&quot;][0][&quot;id&quot;])&#39;   Find a template ID by name using tower-cli tower-cli job_template list --name &#39;Rolling Test&#39; --format id   No space in any search string.">
 
 
   <meta name="author" content="Eric Chong">
@@ -26,7 +26,7 @@
 <meta property="og:url" content="http://localhost:4000/ansible/How_to_search/">
 
 
-  <meta property="og:description" content="Some examples to use the search box in Tower to filter or create smart inventory  see (https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)[https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html] Find disabled hosts enabled:false   Find hosts with hostvar defined variables.icontains:myvar   Use as host filter on tower-cli tower-cli host list --host-filter &#39;variables__icontains=application&#39;   Find hosts with ansible facts equal a value ansible_facts.ansible_os_family:RedHat   Find hosts in organization organization.name:Default   Find hosts in a group belongs to an inventory First we need to find the group number using the api URL. For example, to list groups info for inventory id 18 https://tower-host.com/api/v2/inventories/18/groups/ Then use the group id in the filter groups:482   Find hosts in a group name from any inventory groups.name:mygroup   Find hosts that failed the last job has_active_failures:true  Find hosts by name name.startswith:dev name.exact:devhost4 name.istartwith:dev name.endswith:4 name.regex:^dev.*4$   Using the host filter on tower-cli tower-cli host list --host-filter name__endswith=80 -vvv tower-cli host list --host-filter name__startswith=RN tower-cli host list --host-filter &#39;name__regex=fedora[0-9]&#39; tower-cli host list --host-filter &#39;name__startswith=RN and name__regex=01$&#39;   Find dev hosts that are marked as ‘d’ on the 6th characters name.regex:^.{5}d   Find a template ID by name using curl curl -k -u john:secret https://192.168.0.101/api/v2/job_templates/?name=&#39;My Template&#39; | python3 -c &#39;import json,sys; print (json.load(sys.stdin)[&quot;results&quot;][0][&quot;id&quot;])&#39;   Find a template ID by name using tower-cli tower-cli job_template list --name &#39;Rolling Test&#39; --format id   No space in any search string.">
+  <meta property="og:description" content="Some examples to use the search box in Tower to filter or create smart inventory  see Automation Controller API Guide - Filtering  old URL https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html Find disabled hosts enabled:false   Find hosts with hostvar defined variables.icontains:myvar   Use as host filter on tower-cli tower-cli host list --host-filter &#39;variables__icontains=application&#39;   Find hosts with ansible facts equal a value ansible_facts.ansible_os_family:RedHat   Find hosts in organization organization.name:Default   Find hosts in a group belongs to an inventory First we need to find the group number using the api URL. For example, to list groups info for inventory id 18 https://tower-host.com/api/v2/inventories/18/groups/ Then use the group id in the filter groups:482   Find hosts in a group name from any inventory groups.name:mygroup   Find hosts that failed the last job has_active_failures:true  Find hosts by name name.startswith:dev name.exact:devhost4 name.istartwith:dev name.endswith:4 name.regex:^dev.*4$   Using the host filter on tower-cli tower-cli host list --host-filter name__endswith=80 -vvv tower-cli host list --host-filter name__startswith=RN tower-cli host list --host-filter &#39;name__regex=fedora[0-9]&#39; tower-cli host list --host-filter &#39;name__startswith=RN and name__regex=01$&#39;   Find dev hosts that are marked as ‘d’ on the 6th characters name.regex:^.{5}d   Find a template ID by name using curl curl -k -u john:secret https://192.168.0.101/api/v2/job_templates/?name=&#39;My Template&#39; | python3 -c &#39;import json,sys; print (json.load(sys.stdin)[&quot;results&quot;][0][&quot;id&quot;])&#39;   Find a template ID by name using tower-cli tower-cli job_template list --name &#39;Rolling Test&#39; --format id   No space in any search string.">
 
 
 
@@ -37,6 +37,8 @@
   <meta property="article:published_time" content="2020-01-23T00:00:00-05:00">
 
 
+
+  <meta property="article:modified_time" content="2022-02-10T00:00:00-05:00">
 
 
 
@@ -304,9 +306,9 @@
 
   <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
     <meta itemprop="headline" content="How to search on Tower">
-    <meta itemprop="description" content="Some examples to use the search box in Tower to filter or create smart inventorysee (https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)[https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html]Find disabled hostsenabled:falseFind hosts with hostvar definedvariables.icontains:myvarUse as host filter on tower-clitower-cli host list --host-filter &#39;variables__icontains=application&#39;Find hosts with ansible facts equal a valueansible_facts.ansible_os_family:RedHatFind hosts in organizationorganization.name:DefaultFind hosts in a group belongs to an inventoryFirst we need to find the group number using the api URL.For example, to list groups info for inventory id 18https://tower-host.com/api/v2/inventories/18/groups/Then use the group id in the filtergroups:482Find hosts in a group name from any inventorygroups.name:mygroupFind hosts that failed the last jobhas_active_failures:trueFind hosts by namename.startswith:devname.exact:devhost4name.istartwith:devname.endswith:4name.regex:^dev.*4$Using the host filter on tower-clitower-cli host list --host-filter name__endswith=80 -vvvtower-cli host list --host-filter name__startswith=RNtower-cli host list --host-filter &#39;name__regex=fedora[0-9]&#39;tower-cli host list --host-filter &#39;name__startswith=RN and name__regex=01$&#39;Find dev hosts that are marked as ‘d’ on the 6th charactersname.regex:^.{5}dFind a template ID by name using curlcurl -k -u john:secret https://192.168.0.101/api/v2/job_templates/?name=&#39;My Template&#39; | python3 -c &#39;import json,sys; print (json.load(sys.stdin)[&quot;results&quot;][0][&quot;id&quot;])&#39;Find a template ID by name using tower-clitower-cli job_template list --name &#39;Rolling Test&#39; --format idNo space in any search string.">
+    <meta itemprop="description" content="Some examples to use the search box in Tower to filter or create smart inventorysee Automation Controller API Guide - Filteringold URL https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.htmlFind disabled hostsenabled:falseFind hosts with hostvar definedvariables.icontains:myvarUse as host filter on tower-clitower-cli host list --host-filter &#39;variables__icontains=application&#39;Find hosts with ansible facts equal a valueansible_facts.ansible_os_family:RedHatFind hosts in organizationorganization.name:DefaultFind hosts in a group belongs to an inventoryFirst we need to find the group number using the api URL.For example, to list groups info for inventory id 18https://tower-host.com/api/v2/inventories/18/groups/Then use the group id in the filtergroups:482Find hosts in a group name from any inventorygroups.name:mygroupFind hosts that failed the last jobhas_active_failures:trueFind hosts by namename.startswith:devname.exact:devhost4name.istartwith:devname.endswith:4name.regex:^dev.*4$Using the host filter on tower-clitower-cli host list --host-filter name__endswith=80 -vvvtower-cli host list --host-filter name__startswith=RNtower-cli host list --host-filter &#39;name__regex=fedora[0-9]&#39;tower-cli host list --host-filter &#39;name__startswith=RN and name__regex=01$&#39;Find dev hosts that are marked as ‘d’ on the 6th charactersname.regex:^.{5}dFind a template ID by name using curlcurl -k -u john:secret https://192.168.0.101/api/v2/job_templates/?name=&#39;My Template&#39; | python3 -c &#39;import json,sys; print (json.load(sys.stdin)[&quot;results&quot;][0][&quot;id&quot;])&#39;Find a template ID by name using tower-clitower-cli job_template list --name &#39;Rolling Test&#39; --format idNo space in any search string.">
     <meta itemprop="datePublished" content="2020-01-23T00:00:00-05:00">
-    
+    <meta itemprop="dateModified" content="2022-02-10T00:00:00-05:00">
 
     <div class="page__inner-wrap">
       
@@ -350,7 +352,9 @@
         
         <h2 id="some-examples-to-use-the-search-box-in-tower-to-filter-or-create-smart-inventory">Some examples to use the search box in Tower to filter or create smart inventory</h2>
 
-<p>see (https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)[https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html]</p>
+<p>see <a href="https://docs.ansible.com/automation-controller/latest/html/controllerapi/filtering.html">Automation Controller API Guide - Filtering</a></p>
+
+<p>old URL <a href="https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html">https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html</a></p>
 <h3 id="find-disabled-hosts">Find disabled hosts</h3>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>enabled:false
 </code></pre></div></div>
@@ -459,7 +463,7 @@ tower-cli host list <span class="nt">--host-filter</span> <span class="s1">'name
 
         
 
-  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2020-01-23T00:00:00-05:00">January 23, 2020</time></p>
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2022-02-10">February 10, 2022</time></p>
 
       </footer>
 
@@ -498,6 +502,53 @@ tower-cli host list <span class="nt">--host-filter</span> <span class="s1">'name
     <div class="page__related">
       <h2 class="page__related-title">You may also enjoy</h2>
       <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ansible/aap-container-group/" rel="permalink">How to setup an OpenShift container group with AAP
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2022-01-29T00:00:00-05:00">January 29, 2022</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          3 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Ansible Automation Platform Container Groups
+AAP Container Groups is just like Instance Groups.  However, the playbooks will be executed in a pod running in ...</p>
+  </article>
+</div>
+
         
           
 
@@ -635,53 +686,6 @@ We would like to use a third part collection, in this case community.efficientip
 
 
     <p class="archive__item-excerpt" itemprop="description">How to deploy AAP 2.1 on OpenShift from CLI without Cluster Admin privileges (kind of)
-</p>
-  </article>
-</div>
-
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title no_toc" itemprop="headline">
-      
-        <a href="/rhel/rhel-kisok/" rel="permalink">How to setup RHEL 8 to run as a kiosk
-</a>
-      
-    </h2>
-    
-
-  <p class="page__meta">
-    
-      
-      <span class="page__meta-date">
-        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
-        
-        <time datetime="2021-11-24T00:00:00-05:00">November 24, 2021</time>
-      </span>
-    
-
-    <span class="page__meta-sep"></span>
-
-    
-      
-      
-
-      <span class="page__meta-readtime">
-        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
-        
-          1 minute read
-        
-      </span>
-    
-  </p>
-
-
-    <p class="archive__item-excerpt" itemprop="description">How to setup RHEL 8 to run as a kiosk
 </p>
   </article>
 </div>

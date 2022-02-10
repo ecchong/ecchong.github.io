@@ -228,7 +228,7 @@ var store = [{
         "teaser": null
       },{
         "title": "How to search on Tower",
-        "excerpt":"Some examples to use the search box in Tower to filter or create smart inventory see (https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html)[https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html] Find disabled hosts enabled:false Find hosts with hostvar defined variables.icontains:myvar Use as host filter on tower-cli tower-cli host list --host-filter 'variables__icontains=application' Find hosts with ansible facts equal a value ansible_facts.ansible_os_family:RedHat Find hosts in...","categories": ["Ansible"],
+        "excerpt":"Some examples to use the search box in Tower to filter or create smart inventory see Automation Controller API Guide - Filtering old URL https://docs.ansible.com/ansible-tower/latest/html/towerapi/filtering.html Find disabled hosts enabled:false Find hosts with hostvar defined variables.icontains:myvar Use as host filter on tower-cli tower-cli host list --host-filter 'variables__icontains=application' Find hosts with ansible...","categories": ["Ansible"],
         "tags": ["Ansible","Tower","search"],
         "url": "/ansible/How_to_search/",
         "teaser": null
@@ -339,5 +339,11 @@ var store = [{
         "excerpt":"Automation Hub, LDAP and SSO Latest version of Automation Hub does not has built-in LDAP support. Instead it relies on Red Hat SSO to provide integration with the LDAP authentication. Fortunately the AAP installation playbooks will assist setting up the SSO application on a separate VM with Automation Hub. Openldap...","categories": ["Ansible"],
         "tags": ["ansible","aap","docker","podman","container","Tower","Automation Hub","LDAP","OpenLDAP"],
         "url": "/ansible/lab-ldap-for-aap/",
+        "teaser": null
+      },{
+        "title": "How to setup an OpenShift container group with AAP",
+        "excerpt":"Ansible Automation Platform Container Groups AAP Container Groups is just like Instance Groups. However, the playbooks will be executed in a pod running in your OpenShift or Kubernetes environment. You can find the details at Container and Instance Groups What if you want to test this out but don’t have...","categories": ["Ansible"],
+        "tags": ["ansible","aap","container","Tower","OpenShift"],
+        "url": "/ansible/aap-container-group/",
         "teaser": null
       }]
