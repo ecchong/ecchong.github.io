@@ -10,7 +10,7 @@
     <meta charset="utf-8">
 
 <!-- begin _includes/seo.html --><title>How to create a new execution environment | Automate NYC!</title>
-<meta name="description" content="Build a new EE image We would like to use a third part collection, in this case community.efficientip, in our playbooks. The collection is currently in the Automation Hub server and it also requires a Python module, SOLIDserverRest, which is available via pip.  Since this Python module is no available in the standard execution environment, we will need to create a new EE image using ansible-builder">
+<meta name="description" content="Build a new EE image We would like to use a third part collection, in this case community.efficientip and community.crypto, in our playbooks. The collection is currently in the Automation Hub server and it requires a Python modules, SOLIDserverRest and pyOpenSSL, which are available via pip.  The playbooks we are running will also need the Samba client to copy some files to the Windows file share.   We will use the ansible-builder utility to include all these into our custom image.">
 
 
   <meta name="author" content="Eric Chong">
@@ -26,7 +26,7 @@
 <meta property="og:url" content="http://localhost:4000/ansible/create-new-ee/">
 
 
-  <meta property="og:description" content="Build a new EE image We would like to use a third part collection, in this case community.efficientip, in our playbooks. The collection is currently in the Automation Hub server and it also requires a Python module, SOLIDserverRest, which is available via pip.  Since this Python module is no available in the standard execution environment, we will need to create a new EE image using ansible-builder">
+  <meta property="og:description" content="Build a new EE image We would like to use a third part collection, in this case community.efficientip and community.crypto, in our playbooks. The collection is currently in the Automation Hub server and it requires a Python modules, SOLIDserverRest and pyOpenSSL, which are available via pip.  The playbooks we are running will also need the Samba client to copy some files to the Windows file share.   We will use the ansible-builder utility to include all these into our custom image.">
 
 
 
@@ -37,6 +37,8 @@
   <meta property="article:published_time" content="2022-01-09T00:00:00-05:00">
 
 
+
+  <meta property="article:modified_time" content="2022-02-10T00:00:00-05:00">
 
 
 
@@ -202,7 +204,8 @@
     </h3>
     
       <div class="author__bio p-note" itemprop="description">
-        <p>Ansible Automation Architect @ Red Hat</p>
+        <p>Ansible Automation Architect 
+@ Red Hat</p>
 
       </div>
     
@@ -304,9 +307,9 @@
 
   <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
     <meta itemprop="headline" content="How to create a new execution environment">
-    <meta itemprop="description" content="Build a new EE imageWe would like to use a third part collection, in this case community.efficientip, in our playbooks. The collection is currently in the Automation Hub server and it also requires a Python module, SOLIDserverRest, which is available via pip.  Since this Python module is no available in the standard execution environment, we will need to create a new EE image using ansible-builder">
+    <meta itemprop="description" content="Build a new EE imageWe would like to use a third part collection, in this case community.efficientip and community.crypto, in our playbooks. The collection is currently in the Automation Hub server and it requires a Python modules, SOLIDserverRest and pyOpenSSL, which are available via pip.  The playbooks we are running will also need the Samba client to copy some files to the Windows file share.   We will use the ansible-builder utility to include all these into our custom image.">
     <meta itemprop="datePublished" content="2022-01-09T00:00:00-05:00">
-    
+    <meta itemprop="dateModified" content="2022-02-10T00:00:00-05:00">
 
     <div class="page__inner-wrap">
       
@@ -336,7 +339,7 @@
       <span class="page__meta-readtime">
         <i class="far fa-clock" aria-hidden="true"></i>
         
-          1 minute read
+          2 minute read
         
       </span>
     
@@ -349,7 +352,7 @@
       <section class="page__content e-content" itemprop="text">
         
         <h1 id="build-a-new-ee-image">Build a new EE image</h1>
-<p>We would like to use a third part collection, in this case <code class="language-plaintext highlighter-rouge">community.efficientip</code>, in our playbooks. The collection is currently in the Automation Hub server and it also requires a Python module, <code class="language-plaintext highlighter-rouge">SOLIDserverRest</code>, which is available via pip.  Since this Python module is no available in the standard execution environment, we will need to create a new EE image using <code class="language-plaintext highlighter-rouge">ansible-builder</code></p>
+<p>We would like to use a third part collection, in this case <code class="language-plaintext highlighter-rouge">community.efficientip</code> and <code class="language-plaintext highlighter-rouge">community.crypto</code>, in our playbooks. The collection is currently in the Automation Hub server and it requires a Python modules, <code class="language-plaintext highlighter-rouge">SOLIDserverRest</code> and <code class="language-plaintext highlighter-rouge">pyOpenSSL</code>, which are available via <code class="language-plaintext highlighter-rouge">pip</code>.  The playbooks we are running will also need the Samba client to copy some files to the Windows file share.   We will use the <code class="language-plaintext highlighter-rouge">ansible-builder</code> utility to include all these into our custom image.</p>
 
 <p>Inside the build directory, create a file called <code class="language-plaintext highlighter-rouge">execution-environment.yml</code>:</p>
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
@@ -357,10 +360,12 @@
 
 <span class="na">build_arg_defaults</span><span class="pi">:</span>
   <span class="na">EE_BASE_IMAGE</span><span class="pi">:</span> <span class="s1">'</span><span class="s">aap-hub1.lab.automate.nyc/ee-supported-rhel8'</span>
+  <span class="na">EE_BUILDER_IMAGE</span><span class="pi">:</span> <span class="s1">'</span><span class="s">registry.redhat.io/ansible-automation-platform-21/ansible-builder-rhel8'</span>
 
 <span class="na">dependencies</span><span class="pi">:</span>
-  <span class="na">python</span><span class="pi">:</span> <span class="s">requirements-efficientip.txt</span>
+  <span class="na">python</span><span class="pi">:</span> <span class="s">requirements.txt</span>
   <span class="na">galaxy</span><span class="pi">:</span> <span class="s">requirements.yml</span>
+  <span class="na">system</span><span class="pi">:</span> <span class="s">bindep.txt</span>
 
 <span class="na">ansible_config</span><span class="pi">:</span> <span class="s1">'</span><span class="s">ansible.cfg'</span>
 
@@ -368,8 +373,9 @@
   <span class="na">prepend</span><span class="pi">:</span> <span class="pi">|</span>
     <span class="s">RUN pip3 install --upgrade pip wheel setuptools</span>
 </code></pre></div></div>
-<p>We are going to use the standard EE image <code class="language-plaintext highlighter-rouge">ee-supported-rhel8</code> from my Automation Hub server <code class="language-plaintext highlighter-rouge">aap-hub1.lab.automate.nyc</code> as base image.  The dependency files identify required Python modules and collections.  In our case, the <code class="language-plaintext highlighter-rouge">requirement-efficientip.txt</code> contains the Python module name in pip format:</p>
+<p>We are going to use the standard EE image <code class="language-plaintext highlighter-rouge">ee-supported-rhel8</code> from our Automation Hub server <code class="language-plaintext highlighter-rouge">aap-hub1.lab.automate.nyc</code> as base image defined by the <code class="language-plaintext highlighter-rouge">EE_BASE_IMAGE</code> key.  The <code class="language-plaintext highlighter-rouge">EE_BUILDER_IMAGE</code> key defined the ansible-builder image we are going to use.  The dependency files identify required Python modules, Ansible collections and RPMs.  In our case, the <code class="language-plaintext highlighter-rouge">requirement.txt</code> contains the Python module name in pip format:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SOLIDserverRest
+pyOpenSSL
 </code></pre></div></div>
 <p>The <code class="language-plaintext highlighter-rouge">requirements.yml</code> file contains the list of required collections:</p>
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
@@ -377,6 +383,10 @@
 <span class="pi">-</span> <span class="s">community.crypto</span>
 <span class="pi">-</span> <span class="s">community.efficientip</span>
 </code></pre></div></div>
+<p>The <code class="language-plaintext highlighter-rouge">bindep.txt</code> file contains the list of packages to be installed:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>samba-client [platform:redhat]
+</code></pre></div></div>
+
 <p>Since we will be pulling collections from our Automation Hub server, we will need to configure the <code class="language-plaintext highlighter-rouge">ansible.cfg</code> file with proper credentials:</p>
 <div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[galaxy]</span>
 <span class="py">server_list</span> <span class="p">=</span> <span class="s">automation_hub, rh-certified_repo, published_repo, community_repo</span>
@@ -397,13 +407,16 @@
 <span class="py">url</span><span class="p">=</span><span class="s">https://aap-hub1.lab.automate.nyc/api/galaxy/content/community/</span>
 <span class="py">token</span><span class="p">=</span><span class="s">&lt;token string&gt;</span>
 </code></pre></div></div>
+
+<p>Any additional commands can be defined in the <code class="language-plaintext highlighter-rouge">additional_build_steps</code> section.</p>
+
 <p>To create a new image, run command:</p>
-<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible-builder build <span class="nt">--tag</span> aap-hub1.lab.automate.nyc/efficientip_ee <span class="nt">--container-runtime</span> docker
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible-builder build <span class="nt">--tag</span> aap-hub1.lab.automate.nyc/my_custom_ee:v1 <span class="nt">--container-runtime</span> docker
 </code></pre></div></div>
 <p>The image will be tagged with our Automation Hub server name, so it can be pushed to our server once it is created.  Default <code class="language-plaintext highlighter-rouge">ansible-builder</code> command will use <code class="language-plaintext highlighter-rouge">podman</code>, but in this case we will be using <code class="language-plaintext highlighter-rouge">docker</code> while running on MacOS.</p>
 
 <p>After the build is done, we can verify the new image with <code class="language-plaintext highlighter-rouge">ansible-navigator</code> command.  To list the installed collections:</p>
-<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible-navigator collections <span class="nt">--ce</span> docker  <span class="nt">--eei</span> aap-hub1.lab.automate.nyc/efficientip_ee
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible-navigator collections <span class="nt">--ce</span> docker  <span class="nt">--eei</span> aap-hub1.lab.automate.nyc/my_custom_ee:v1
 </code></pre></div></div>
 <p>Again, we are running on MacOS, so we will need to specify to use <code class="language-plaintext highlighter-rouge">docker</code> as our container engine.</p>
 
@@ -411,9 +424,9 @@
 <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>docker login <span class="nt">--username</span> admin aap-hub1.lab.automate.nyc
 Password: 
 Login Succeeded
-<span class="nv">$ </span>docker push aap-hub1.lab.automate.nyc/efficientip_ee
+<span class="nv">$ </span>docker push aap-hub1.lab.automate.nyc/my_custom_ee:v1
 Using default tag: latest
-The push refers to repository <span class="o">[</span>aap-hub1.lab.automate.nyc/efficientip_ee]
+The push refers to repository <span class="o">[</span>aap-hub1.lab.automate.nyc/my_custom_ee:v1]
 206894a40f6c: Layer already exists 
 2e257b8b9924: Layer already exists 
 d1803f81822a: Layer already exists 
@@ -425,10 +438,15 @@ af092941766c: Layer already exists
 latest: digest: sha256:8deba4dad1c74013ab02c41ce5f87f1353b4e85841ae88eacafdc8d9aed9b4fe size: 2009
 </code></pre></div></div>
 
+<p>Once the image of out custom EE is pushed to Automation Hub, we can create the EE on our AAP Controller following the normal procedures.</p>
+
 <h1 id="references">References</h1>
 <p><a href="https://www.ansible.com/blog/introduction-to-ansible-builder">Introduction to Ansible Builder</a></p>
 
 <p><a href="https://www.ansible.com/blog/automating-execution-environment-image-builds-with-github-actions">Automating execution environment image builds with GitHub Actions</a></p>
+
+<h1 id="notes">Notes</h1>
+<p>EOL of CentOS 8 causing the default <code class="language-plaintext highlighter-rouge">ansible-builder</code> image, which is CentOS based, failed when trying to install any rpm using bindep.  Use <code class="language-plaintext highlighter-rouge">EE_BUILDER_IMAGE</code> to specify a RHEL based build image instead.</p>
 
         
       </section>
@@ -482,7 +500,7 @@ latest: digest: sha256:8deba4dad1c74013ab02c41ce5f87f1353b4e85841ae88eacafdc8d9a
 
         
 
-  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2022-01-09T00:00:00-05:00">January 9, 2022</time></p>
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2022-02-10">February 10, 2022</time></p>
 
       </footer>
 
@@ -528,6 +546,10 @@ latest: digest: sha256:8deba4dad1c74013ab02c41ce5f87f1353b4e85841ae88eacafdc8d9a
 
 <div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/background_nyc.png" alt="">
+      </div>
     
     <h2 class="archive__item-title no_toc" itemprop="headline">
       
@@ -576,6 +598,10 @@ AAP Container Groups is just like Instance Groups.  However, the playbooks will 
 <div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
+      <div class="archive__item-teaser">
+        <img src="/assets/images/background_nyc.png" alt="">
+      </div>
+    
     <h2 class="archive__item-title no_toc" itemprop="headline">
       
         <a href="/ansible/lab-ldap-for-aap/" rel="permalink">How to setup a lab LDAP for AAP controller and hub
@@ -623,6 +649,10 @@ Latest version of Automation Hub does not has built-in LDAP support.  Instead it
 <div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
+      <div class="archive__item-teaser">
+        <img src="/assets/images/background_nyc.png" alt="">
+      </div>
+    
     <h2 class="archive__item-title no_toc" itemprop="headline">
       
         <a href="/ansible/deploy-aap-openshift-cli/" rel="permalink">How to deploy AAP 2.1 on OpenShift from CLI
@@ -669,6 +699,10 @@ Latest version of Automation Hub does not has built-in LDAP support.  Instead it
 
 <div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/background_nyc.png" alt="">
+      </div>
     
     <h2 class="archive__item-title no_toc" itemprop="headline">
       

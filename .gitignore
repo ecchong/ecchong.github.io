@@ -1,3 +1,4 @@
 local_test.sh
 .DS_Store
 .jekyll-cache
+_site
