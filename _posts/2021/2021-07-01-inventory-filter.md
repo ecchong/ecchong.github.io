@@ -1,11 +1,12 @@
 ---
-title: How to filter hosts on Tower inventory import
+title: How to filter and group VMs using dynamic inventory
 tags: ["ansible", "tower", "vcenter", "vmware"]
 categories: Ansible
-
+last_modified_at: 2022-02-16
 ---
 
-# How to filter hosts on Tower inventory import
+# How to filter and group VMs using dynamic inventory
+We would like to pull only certain VMs from our vCenter and put them in different inventory groups.
 Some examples using filters when importing inventory from vCenter.  See the [plugin doc](https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_vm_inventory_inventory.html) for details.
 
 ## Scenario 1
@@ -43,3 +44,38 @@ resources:
   - folder:
     - "management"
 ```
+
+## Scenario 3
+- Only VMs in folders `Test VMs` and `pfSense Test` under `LAB` datacenter should be imported.
+- They should be grouped based on the resource pool and OS.  The group name is prefixed accordingly.
+```yaml
+---
+validate_certs: False
+hostnames:
+- config.name
+properties:
+- config.guestId
+- config.name
+- resourcePool
+with_nested_properties: True
+keyed_groups:
+- key: resourcePool
+  separator: ''
+  prefix: 'ResourcePool'
+- key: config.guestId
+  separator: '_'
+  prefix: 'OS'
+resources:
+- datacenter:
+  - LAB
+  resources:
+  - folder:
+    - Test VMs
+    - pfSense Test
+```
+Note: Resource pool ID will be used in the group name, since pool name is not available.
+
+# References
+- [VM attributes](https://docs.ansible.com/ansible/latest/scenario_guides/vmware_scenarios/vmware_inventory_vm_attributes.html#vmware-inventory-vm-attributes)
+- [plugin doc](https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_vm_inventory_inventory.html) 
+- [Git repo](https://github.com/ansible-collections/community.vmware/blob/main/plugins/inventory/vmware_vm_inventory.py)
