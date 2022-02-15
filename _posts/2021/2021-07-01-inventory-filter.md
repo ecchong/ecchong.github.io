@@ -46,13 +46,20 @@ resources:
 ```
 
 ## Scenario 3
-- Only VMs in folders `Test VMs` and `pfSense Test` under `LAB` datacenter should be imported.
+- Import only VMs:
+  * in folder `Test VMs` and  under `LAB` datacenter
+  * that are powered on
+  * are set as Windows OS on vCenter
 - They should be grouped based on the resource pool and OS.  The group name is prefixed accordingly.
+
 ```yaml
 ---
 validate_certs: False
 hostnames:
 - config.name
+filters:
+- summary.runtime.powerState == "poweredOn"
+- config.guestId.startswith('windows')
 properties:
 - config.guestId
 - config.name
@@ -71,7 +78,6 @@ resources:
   resources:
   - folder:
     - Test VMs
-    - pfSense Test
 ```
 Note: Resource pool ID will be used in the group name, since pool name is not available.
 
