@@ -1,5 +1,5 @@
 ---
-title: How to see you Automation Mesh layout
+title: How to visualize your Automation Mesh layout
 tags: ["ansible", "aap", "container", "Tower", "mesh" ]
 categories: Ansible
 #last_modified_at: 2022-02-10
