@@ -1,3 +1,0 @@
-I"g<h1 id="automation-hub-ldap-and-sso">Automation Hub, LDAP and SSO</h1>
-<p>Latest version of Automation Hub does not has built-in LDAP support.  Instead it relies on Red Hat SSO to provide integration with the LDAP authentication.  Fortunately the AAP installation playbooks will assist setting up the SSO application on a separate VM with Automation Hub.</p>
-:ET
