@@ -16,6 +16,8 @@ main:
     url: /categories/
   - title: "Tags"
     url: /tags/
+  - title: "KB Docs"
+    url: /knowledge-base/
 #  - title: "Pages"
 #    url: /page-archive/
 #  - title: "Collections"

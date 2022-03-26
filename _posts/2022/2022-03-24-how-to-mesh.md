@@ -167,6 +167,6 @@ To do a traceroute to see which nodes it pass through.
 
 See the Receptor document for more information
 
-https://receptor.readthedocs.io/en/latest/index.html
+[https://receptor.readthedocs.io/en/latest/index.html](https://receptor.readthedocs.io/en/latest/index.html)
 
-https://github.com/ansible/receptor
+[https://github.com/ansible/receptor](https://github.com/ansible/receptor)
