@@ -2,7 +2,7 @@
 title: How to setup an OpenShift container group with AAP
 tags: ["ansible", "aap", "container", "Tower", "OpenShift" ]
 categories: Ansible
-last_modified_at: 2022-02-10
+last_modified_at: 2022-03-31
 
 ---
 
@@ -36,6 +36,7 @@ rules:
   - pods/exec
   - pods/attach
   - pods
+  - secrets
   verbs:
   - get
   - list
