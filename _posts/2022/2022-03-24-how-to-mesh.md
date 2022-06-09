@@ -2,7 +2,7 @@
 title: How to visualize your Automation Mesh layout
 tags: ["ansible", "aap", "container", "Tower", "mesh" ]
 categories: Ansible
-#last_modified_at: 2022-02-10
+last_modified_at: 2022-06-09
 published: true
 ---
 
@@ -170,3 +170,5 @@ See the Receptor document for more information
 [https://receptor.readthedocs.io/en/latest/index.html](https://receptor.readthedocs.io/en/latest/index.html)
 
 [https://github.com/ansible/receptor](https://github.com/ansible/receptor)
+
+Update: AAP 2.2 now comes with a visualizer to display the layout of mesh
