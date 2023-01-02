@@ -2,7 +2,7 @@
 title: How to create a new execution environment
 tags: ["ansible", "aap", "ee", "execution environment", "docker", "podman", "container" ]
 categories: Ansible
-last_modified_at: 2022-02-10
+last_modified_at: 2023-01-02
 ---
 
 # Build a new EE image
@@ -109,3 +109,7 @@ Once the image of out custom EE is pushed to Automation Hub, we can create the E
 
 # Notes
 EOL of CentOS 8 causing the default `ansible-builder` image, which is CentOS based, failed when trying to install any rpm using bindep.  Use `EE_BUILDER_IMAGE` to specify a RHEL based build image instead.
+
+# Update
+- There is a great blog post [The anatomy of automation execution environments](https://www.ansible.com/blog/the-anatomy-of-automation-execution-environments) explaining the differences between upstream and downstream version of `ansible-builder`.  The latest upstream `ansible-builder` has been updated to CentOS 8 stream.
+- Since GitHub Actions only support Ubunut runner, we can only use the upstream builder image `quay.io/ansible/ansible-builder` with CentOS 8 Stream.  The RHEL 8 UBI builder image won't be able to pull any packages when running on a Ubuntu podman host. 
