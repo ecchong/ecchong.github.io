@@ -24,7 +24,7 @@ Extra variables are added to the payload as key value pair JSON dictionary objec
 ```
 
 Following is the full script.
-```shell showLineNumbers
+```shell
 #!/bin/bash
 AAP_HOST=aap-controller1.lab.automate.nyc
 AAP_USERNAME=<AAP username>
