@@ -1,6 +1,6 @@
 ---
 title: Seaching a list of dictionay objects where keys name has dots
-tags: ["ansible", "jinja2" ]
+tags: ["ansible", "jinja2", "json_query", "selectattr" ]
 categories: Ansible
 #last_modified_at: YYYY-MM-DD
 published: true
@@ -10,6 +10,7 @@ We need to search a list of dictionary objects where the key name is dynamic and
 
 `selectattr` will be a good option, but it fails to handle the dot.  We will need to use `json_query` in the following example:
 
+{% raw %}
 ````
 ---
 - name: Examples - Find dict with dots in key name
@@ -44,6 +45,7 @@ We need to search a list of dictionary objects where the key name is dynamic and
     vars:
       x: "[?\"one.one.one\"]"
 ````
+{% endraw %}
 
 Output:
 ````
