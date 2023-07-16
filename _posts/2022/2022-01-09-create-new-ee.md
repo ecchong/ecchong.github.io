@@ -3,6 +3,7 @@ title: How to create a new execution environment
 tags: ["ansible", "aap", "ee", "execution environment", "docker", "podman", "container" ]
 categories: Ansible
 last_modified_at: 2023-01-02
+description: "Ansible Automation Platform - create a new execution environment image"
 ---
 
 # Build a new EE image

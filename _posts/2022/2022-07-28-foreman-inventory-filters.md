@@ -4,6 +4,7 @@ tags: ["ansible", "foreman", "satellite" ]
 categories: Ansible
 #last_modified_at: YYYY-MM-DD
 published: true
+description: "Ansible - Foreman or Satellite inventory plugin filters example"
 ---
 
 The Ansible Foreman inventory plugin import all hosts by default.  It can also be filtered to only import certain hosts.  The filter plugin uses the Foreman/Satellite search hosts API, so the filter syntax is very similar.

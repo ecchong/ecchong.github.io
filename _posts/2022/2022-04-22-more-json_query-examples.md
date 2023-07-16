@@ -4,6 +4,7 @@ tags: ["ansible", "aap", "json_query", "aws" ]
 categories: Ansible
 #last_modified_at: 2022-02-10
 published: true
+description: "Ansible - more json_query examples"
 ---
 
 More examples on using json_query in your playbook.

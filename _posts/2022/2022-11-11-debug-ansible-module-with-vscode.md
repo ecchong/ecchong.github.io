@@ -4,6 +4,7 @@ tags: ["ansible", "debug", "python", "aap", "vscode" ]
 categories: Ansible
 #last_modified_at: YYYY-MM-DD
 published: true
+description: "Ansible - debuging Ansible modules with Microsoft Visual Studio Code"
 ---
 
 In this case I want to understand how the `awx.awx.credential` works. 

@@ -5,7 +5,6 @@ categories: Ansible
 #last_modified_at: YYYY-MM-DD
 published: true
 description: "Ansible Automation Platform - launch job via REST API from shell script"
-robots: ["index", "follow"]
 ---
 
 We want to launch AAP job from shell script.  The job template has `Limit`, `Instance Groups` and `Variables` set with `Prompt on launch` enabled, so users can provides pass these variables in the API call as JSON data via a POST html call.

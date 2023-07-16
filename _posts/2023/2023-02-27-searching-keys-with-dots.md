@@ -4,6 +4,7 @@ tags: ["ansible", "jinja2", "json_query", "selectattr" ]
 categories: Ansible
 #last_modified_at: YYYY-MM-DD
 published: true
+description: "Ansible - search list of dictionary objects for item with dots in the name, such as FQDN"
 ---
 
 We need to search a list of dictionary objects where the key name is dynamic and might have dots (".") inside, such as a FQDN hostname.

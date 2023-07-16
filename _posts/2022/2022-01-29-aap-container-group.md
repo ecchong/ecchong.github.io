@@ -3,7 +3,7 @@ title: How to setup an OpenShift container group with AAP
 tags: ["ansible", "aap", "container", "Tower", "OpenShift" ]
 categories: Ansible
 last_modified_at: 2022-03-31
-
+description: "Ansible Automation Platform - setup OpenShift container group for AAP"
 ---
 
 # Ansible Automation Platform Container Groups

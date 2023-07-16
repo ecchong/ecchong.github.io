@@ -4,6 +4,7 @@ tags: ["ansible", "aap", "container", "Tower", "OpenShift" ]
 categories: Ansible
 #last_modified_at: 2022-02-10
 published: false
+description: "Ansible Automation Platform - using OpenShift internal registry for AAP"
 ---
 
 # Automation Hub on OpenShift

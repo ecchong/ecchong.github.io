@@ -4,6 +4,7 @@ tags: ["ansible", "aap", "container", "Tower", "mesh" ]
 categories: Ansible
 last_modified_at: 2022-06-09
 published: true
+description: "Ansible Automation Platform - visualize mesh layout"
 ---
 
 Automation Mesh is a new feature that replace Isolated node.  Instead of just directly connecting the Tower nodes to Isolated nodes via SSH, we can have different layouts with the Mesh nodes depending on the needs.  To visualize the layout, AAP installation script `setup.sh` has an option to dump out the the Graphviz code and you can cut-and-paste it to [https://dreampuf.github.io/GraphvizOnline/](https://dreampuf.github.io/GraphvizOnline/) 

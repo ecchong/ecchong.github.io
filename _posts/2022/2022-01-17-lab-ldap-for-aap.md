@@ -2,6 +2,7 @@
 title: How to setup a lab LDAP for AAP controller and hub
 tags: ["ansible", "aap", "docker", "podman", "container", "Tower", "Automation Hub", "LDAP", "OpenLDAP" ]
 categories: Ansible
+description: "Ansible Automation Platform - setup openldap for AAP lab"
 ---
 
 # Automation Hub, LDAP and SSO

@@ -2,8 +2,9 @@
 title: Parse YAML with jq
 tags: ["yaml", "jq", "python" ]
 categories: Ansible
-#last_modified_at: 2022-02-10
+last_modified_at: 2023-07-16
 published: true
+description: "YAML - parsing YAML using JQ"
 ---
 
 We want to parse YAML file with `jq` command like JSON file.  Following snippet will use Python to convert YAML file to JSON format and pass to `jq` command. 
@@ -47,3 +48,5 @@ $ python3 -c 'import sys, yaml, json; y=yaml.safe_load(sys.stdin.read()); print(
 "orange"
 "banana"
 ````
+
+Note: Also take a look the "yq" utility 

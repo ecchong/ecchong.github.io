@@ -4,6 +4,7 @@ tags: ["ansible", "winrm", "certificate", "windows" ]
 categories: Ansible
 #last_modified_at: YYYY-MM-DD
 published: true
+description: "Ansible - using certificate for WinRM authentication"
 ---
 WinRM setup default create a self-signed certificate for the HTTPS transport.  We have to set `ansible_winrm_server_cert_validation: ignore` to avoid getting SSL error.  If we have no access to a CA, we can create our own and self-sign our cert.  With a valid or a self generated CA, we can avoid skipping the certification validation when connecting to WinRM.
 

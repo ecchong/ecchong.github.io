@@ -4,6 +4,7 @@ tags: ["ansible", "certificate", "tower", "aap" ]
 categories: Ansible
 #last_modified_at: YYYY-MM-DD
 published: true
+description: "Ansible Automation Platform - setup trust CA Cert on Controller"
 ---
 
 AAP Controller does not read system PKI directory.  So adding CA cert to `/etc/pki/ca-trust/source/anchors directory` and run `update-ca-trust` is not enough.  It will still return SSL error when pulling execution image, for example.

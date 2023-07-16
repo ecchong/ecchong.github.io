@@ -4,6 +4,7 @@ tags: ["ansible", "ssh", "aap", "certificate" ]
 categories: Ansible
 #last_modified_at: YYYY-MM-DD
 published: true
+description: "Ansible Automation Platform - Using signed SSH certificate as machine credential"
 ---
 
 AAP support using signed SSH certificate as machine credential. Here are example instructions setting it up.
