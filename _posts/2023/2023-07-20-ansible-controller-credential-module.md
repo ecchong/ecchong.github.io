@@ -55,6 +55,6 @@ Let say the description is modifed.
 ```
 Now running this task will cause the credential to be updated, since the `description` is changed, the module assume everything need to be updated including the `password`.  If the password has been updated via the console, now it will be reset back to this place holder value.
 
-Same behavior apply to `credentials` role in `infra.controller_configuration` which calls the `credentianl` module.
+Same behavior apply to `credentials` role in `infra.controller_configuration` which calls the `credential` module.
 
 How to know what fields are available for each credential type?  Check the `api/v2/credential_types/` API browser page.
