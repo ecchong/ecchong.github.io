@@ -1,8 +1,8 @@
 ---
 title: Using signed SSH certificate in AAP
-tags: ["ansible", "ssh", "aap", "certificate" ]
+tags: ["ansible", "ssh", "aap", "certificate", "tower" ]
 categories: Ansible
-#last_modified_at: YYYY-MM-DD
+last_modified_at: 2023-07-27
 published: true
 description: "Ansible Automation Platform - Using signed SSH certificate as machine credential"
 ---
@@ -10,34 +10,7 @@ description: "Ansible Automation Platform - Using signed SSH certificate as mach
 AAP support using signed SSH certificate as machine credential. Here are example instructions setting it up.
 
 ### Signing certificates and distrubte CA public key
-This can be either just a new set of SSH keys:
-````shell
-$ ssh-keygen -C 'My CA' -f ca
-Generating public/private rsa key pair.
-Enter passphrase (empty for no passphrase): 
-Enter same passphrase again: 
-Your identification has been saved in ca.
-Your public key has been saved in ca.pub.
-The key fingerprint is:
-SHA256:6KQVQu2IvXtrjr++mRhvOKeCBHSGb8cbtugV7T015VY My CA
-The key's randomart image is:
-+---[RSA 3072]----+
-|  . ..           |
-| o +  .      . E |
-|. +oooo     o .  |
-|. .ooB.+   o o   |
-|. . +.X S . o    |
-| . ..O . o       |
-|... +o.   .      |
-|. ..+==o         |
-|   .+@@+         |
-+----[SHA256]-----+
-$ ls -l
-total 8
--rw-------. 1 echong echong 2635 Feb 13 10:18 ca
--rw-r--r--. 1 echong echong  559 Feb 13 10:18 ca.pub
-````
-It generates a normal pair of SSH keys.  In this example, we are going to use my SSL certificate.  First, we need to extract the public key from the certificate:
+In this example, we are going to use my SSL certificate.  First, we need to extract the public key from the certificate:
 ````shell
 $ openssl x509 -pubkey -in automate.nyc.crt -noout > x509-key.pub
 ````
@@ -76,7 +49,7 @@ The key's randomart image is:
 | ..+o oo+o..     |
 +----[SHA256]-----+
 ````
-The key ID will be `echong_ssh_automate_nyc` and valid for 52 weeks for username `echong` only.
+The key ID will be `echong_ssh_automate_nyc` and valid for 52 weeks for username `echong` only.  To add multiple usernames/principals, use a comma separated list.
 ````shell
 $ ssh-keygen -s automate.nyc.key -I 'echong_ssh_automate_nyc' -V +52w -n echong my_ssh
 Signed user key my_ssh-cert.pub: id "echong_ssh_automate_nyc" serial 0 for echong valid from 2023-02-13T10:50:00 to 2024-02-12T10:51:05
@@ -123,6 +96,16 @@ When using this credential to connect to the target host, the following will be 
 Feb 13 11:26:32 aap-db1.lab.automate.nyc sshd[109844]: Accepted publickey for echong from 192.168.0.101 port 53348 ssh2: RSA-CERT SHA256:5IqjQ/lo5zCDaIjkEGsIg7nIYjTU+z72F27a8C0k91g ID echong_ssh_automate_nyc (serial 0) CA RSA SHA256:Spn7YWfSWItTuSbzp+0zJKxBSTnYLpcRIcvtNrt9NBE
 ````
 Noticed the `Key ID` `echong_ssh_automate_nyc` we used to sign the SSH key, the thumbnails of the ssh key and signing key are logged in the message.
+
+### Summary
+These are where the files go:
+| File | Description | Location |
+| ---- | ----------- | -------- |
+| automate.nyc.pub | The public key generated from signing certificate | /etc/ssh/ca.pub or ~/.ssh/authorized_keys |
+| my_ssh | My private key | Copy the content to AAP SSH Private Key text box |
+| my_ssh-cert.pub | My signed public key | Copy the content to AAP Signed SSH Certificate text box |
+| my_ssh.pub | My public key | No use |
+| x509-key.pub | The intermediate certificate public key | No use |
 
 ### References
 
