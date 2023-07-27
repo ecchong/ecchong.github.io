@@ -99,6 +99,7 @@ Noticed the `Key ID` `echong_ssh_automate_nyc` we used to sign the SSH key, the 
 
 ### Summary
 These are where the files go:
+
 | File | Description | Location |
 | ---- | ----------- | -------- |
 | automate.nyc.pub | The public key generated from signing certificate | /etc/ssh/ca.pub or ~/.ssh/authorized_keys |
