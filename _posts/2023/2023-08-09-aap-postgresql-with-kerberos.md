@@ -2,12 +2,12 @@
 title: Use Kerberos for AAP PostgreSQL Connection
 tags: ["ansible", "kerberos", "aap", "tower", "postgresql", "database", "idm" ]
 categories: Ansible
-last_modified_at: 2023-08-09
+last_modified_at: 2023-08-11
 published: true
 description: "Ansible Automation Platform - Using Kerberos to connect to PostgreSQL database"
 ---
 
-We have Red Hat Identity Management (IdM) setup in the lab to provide Kerberos authentication.  This how-to will demonstrate setting up AAP to connect to its database use a Kerberos user without storing the password as clear text. `node74.lab.automate.nyc` is the PostgreSQL database server and `node71.lab.automate.nyc` is the AAP Controller.  All nodes are member of the `LAB.AUTOMATE.NYC` realm.
+We have Red Hat Identity Management (IdM) setup in the lab to provide Kerberos authentication.  This how-to will demonstrate setting up AAP to connect to its database using a Kerberos user without storing the password in clear text. `node74.lab.automate.nyc` is the PostgreSQL database server and `node71.lab.automate.nyc` is the AAP Controller.  All nodes are member of the `LAB.AUTOMATE.NYC` realm.
 
 ### Create an IdM user
 
@@ -23,6 +23,8 @@ In IdM, add service principal `postgres/node74.lab.automate.nyc@LAB.AUTOMATE.NYC
 ipa host-add-principal node74.lab.automate.nyc postgres/node74.lab.automate.nyc
 ```
 ### Retrieve Keytab file from IdM
+
+Create a keytab file with both user and postgres principals.
 
 ```shell
 [root@node74 ~]# ipa-getkeytab --keytab=/root/node74.keytab --principal=postgres/node74.lab.automate.nyc@LAB.AUTOMATE.NYC
@@ -90,7 +92,7 @@ Valid starting       Expires              Service principal
 08/10/2023 12:11:38  08/11/2023 11:52:07  krbtgt/LAB.AUTOMATE.NYC@LAB.AUTOMATE.NYC
 ```
 
-Test PostgreSQL connection using the Kerberos credential cache.
+Test PostgreSQL connection to `awx` database using the Kerberos credential cache.
 ```shell
 [root@node71 ~]# KRB5CCNAME=/var/lib/awx/awx_postgres.cache psql -h node74.lab.automate.nyc -U awx_postgres@LAB.AUTOMATE.NYC awx
 psql (13.10)
@@ -102,7 +104,7 @@ awx=>
 
 ### Update AAP config files
 
-Update `/etc/tower/conf.d/postgres.py` with the Kerberos user and remote 'PASSWORD'.
+Update `/etc/tower/conf.d/postgres.py` with the Kerberos user and remove 'PASSWORD'.
 ```json
 DATABASES = {
    'default': {
@@ -129,3 +131,29 @@ environment=KRB5CCNAME=/var/lib/awx/awx_postgres.cache
 ```
 
 Restart AAP and confirm all services are started correctly.
+
+### Extend the expiration of the Kerberos ticket
+
+Default IdM Kerberos ticket policy only allow 7 days of renew.  For demo purpose, we are going to extend the default policy and generate another ticket with longer renewal time.
+```shell
+[root@node71 ~]# ipa krbtpolicy-mod --maxrenew=2592000 --maxlife=604800
+  Max life: 604800
+  Max renew: 2592000
+
+[root@node71 ~]# KRB5CCNAME=/var/lib/awx/awx_postgres.cache kinit awx_postgres -r 2592000 -l 604800
+Password for awx_postgres@LAB.AUTOMATE.NYC:
+
+[root@node71 ~]# KRB5CCNAME=/var/lib/awx/awx_postgres.cache klist
+Ticket cache: FILE:/var/lib/awx/awx_postgres.cache
+Default principal: awx_postgres@LAB.AUTOMATE.NYC
+
+Valid starting       Expires              Service principal
+08/11/2023 16:02:24  08/12/2023 15:33:44  krbtgt/LAB.AUTOMATE.NYC@LAB.AUTOMATE.NYC
+	renew until 08/25/2023 16:02:24
+```
+
+We can renew the ticket before it expires by running
+```shell
+KRB5CCNAME=/var/lib/awx/awx_postgres.cache kinit -R
+```
+
