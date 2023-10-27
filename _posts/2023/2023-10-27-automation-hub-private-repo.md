@@ -9,7 +9,7 @@ description: "Automation Hub - How to configure a private repository"
 
 Background
 ----------
-We want to allow user to create they own collection under company namespace, but not sharing with the rest of the Hub users
+We want to allow users to create they own collection under company namespace, but not sharing with the rest of the Hub users
 
 Procedures
 ----------
