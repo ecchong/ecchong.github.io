@@ -26,7 +26,7 @@ server_list = developer_repo
 
 [galaxy_server.developer_repo]
 url=https://aap-hub1.lab.automate.nyc/api/galaxy/content/developer_repo/
-token=<put your token here>
+token=my_token
 ```
 7. Create the namesapce `automate_nyc` for our collection.
 8. Under the `Access` tab of the created namespace, select the created group from above ![Namespace group](/assets/images/2023/2023-10-27-private-repository-namespace-group.png)
