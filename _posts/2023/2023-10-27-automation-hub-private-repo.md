@@ -21,14 +21,14 @@ Procedures
 5. Select `galaxy.ansible_repository_owner` role on the next step, and then click `Add` to complete ![Access role](/assets/images/2023/2023-10-27-private-repository-access-role.png)
 6. We can add exisiting collection under the `Collection versions` tab, but we will push a new collection via command line.  Copy the info from the pop-up window by clicking `Copy CLI configuration` button on top right.  Update the `ansible.cfg` file with this new repo info.
 
-```
-[galaxy]
-server_list = developer_repo
-
-[galaxy_server.developer_repo]
-url=https://aap-hub1.lab.automate.nyc/api/galaxy/content/developer_repo/
-token=my_token
-```
+    ```
+    [galaxy]
+    server_list = developer_repo
+    
+    [galaxy_server.developer_repo]
+    url=https://aap-hub1.lab.automate.nyc/api/galaxy/content/developer_repo/
+    token=my_token
+    ```
 7. Create the namesapce `automate_nyc` for our collection.
 8. Under the `Access` tab of the created namespace, select the created group from above ![Namespace group](/assets/images/2023/2023-10-27-private-repository-namespace-group.png)
 9. Select both `galaxy.collection_namespace_owner` and `galaxy.collection_publisher` to give the group full access to the repository content ![Namespace role](/assets/images/2023/2023-10-27-private-repository-namespace-role.png)
