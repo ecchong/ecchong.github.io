@@ -20,6 +20,7 @@ Procedures
 4. Go to `Access` tab of the created repository, select the group created above ![Access group](/assets/images/2023/2023-10-27-private-repository-access-group.png)
 5. Select `galaxy.ansible_repository_owner` role on the next step, and then click `Add` to complete ![Access role](/assets/images/2023/2023-10-27-private-repository-access-role.png)
 6. We can add exisiting collection under the `Collection versions` tab, but we will push a new collection via command line.  Copy the info from the pop-up window by clicking `Copy CLI configuration` button on top right.  Update the `ansible.cfg` file with this new repo info.
+
 ```
 [galaxy]
 server_list = developer_repo
