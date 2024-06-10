@@ -7,6 +7,7 @@ published: true
 description: "Ansible - Some examples using map"
 ---
 Apped some string to a list of string
+{% raw %}
 ```yaml
   vars:
     file_name:
@@ -20,7 +21,10 @@ Apped some string to a list of string
         patterns: "{{ ['*'] | product(file_name) | map('join') | list }}"
       register: _matched
 ```
+{% endraw %}
 or
+{% raw %}
 ```
         patterns: "{{ file_name | map('regex_replace', '^(.*)$', '*\\1*') }}"
 ```
+{% endraw %}
