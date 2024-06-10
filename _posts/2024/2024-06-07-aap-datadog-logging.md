@@ -1,4 +1,3 @@
-
 ---
 title: Using Datadog as External Logging for AAP
 tags: ["ansible", "aap", "datadog", "rsyslog", "logging" ]
