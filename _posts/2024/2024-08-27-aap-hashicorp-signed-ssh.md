@@ -54,7 +54,7 @@ Restart `sshd` service
 Setup `HashiCorp Vault Signed SSH` lookup credential using any supported authentication method with HashiCorp Vault.
 ![HashiCorp Vault Signed SSH](/assets/images/2024/2024-08-27-aap-hashicorp-vault-signed-ssh.png)
 
-Generate a SSH key pair using `ssh-keygen` on command line.  Will paste the public and private keys in next step
+Generate a SSH key pair using `ssh-keygen` on command line.  The public and private keys will be used in next step.
 
 Setup `Machine` credential in AAP.  Copy generated private key to `SSH Private Key` text box.
 ![AAP Machine credential](/assets/images/2024/2024-08-27-aap-machine-credential.png)
@@ -65,13 +65,13 @@ Selected the created `HashiCorp Vault Signed SSH` lookup credential for `Signed 
 Use the `Test` button to confirm the configuration.
 
 ### Testing
-At runtime, a new certificate will be added to the execution environment on AAP
+At runtime, a new certificate will be added to the execution environment on AAP.  Following message will be added to the job output:
 ```
 Identity added: /runner/artifacts/4261/ssh_key_data (root@node79.lab.automate.nyc)
 Certificate added: /runner/artifacts/4261/ssh_key_data-cert.pub (vault-root-ebdeb8a00c160ad918e6e8238bf92c27dfea3ec340e230de3ea59093e3773c38)
 ```
 
-On the client side, you should see the syslog message indicating that the certificate used for login
+On the client side, you should see the syslog message indicating that the certificate being used for login
 ```
 Aug 27 13:14:07 node79.lab.automate.nyc sshd[1490]: Accepted publickey for root from 192.168.0.101 port 42668 ssh2: RSA-CERT SHA256:6964oAwWCtkY5ugji/ksJ9/qPsNA4jDePqWQk+N3PDg ID vault-root-ebdeb8a00c160ad918e6e8238bf92c27dfea3ec340e230de3ea59093e3773c38 (serial 10466434135153983140) CA RSA SHA256:HUT+GSDsOwFaCfW9l/CvOg+7GYu2UIQS1Yfcwr1uuYo
 ```
