@@ -2,7 +2,7 @@
 title: Using HashiCorp Vault Signed SSH with AAP
 tags: ["ansible", "aap", "hashicorp", "vault", "ssh", "tower", "certificate" ]
 categories: Ansible
-last_modified_at: 2024-08-27
+last_modified_at: 2025-09-16
 published: true
 description: "AAP - Using HashiCorp Vault Signed SSH with AAP"
 ---
@@ -75,3 +75,6 @@ On the client side, you should see the syslog message indicating that the certif
 ```
 Aug 27 13:14:07 node79.lab.automate.nyc sshd[1490]: Accepted publickey for root from 192.168.0.101 port 42668 ssh2: RSA-CERT SHA256:6964oAwWCtkY5ugji/ksJ9/qPsNA4jDePqWQk+N3PDg ID vault-root-ebdeb8a00c160ad918e6e8238bf92c27dfea3ec340e230de3ea59093e3773c38 (serial 10466434135153983140) CA RSA SHA256:HUT+GSDsOwFaCfW9l/CvOg+7GYu2UIQS1Yfcwr1uuYo
 ```
+
+### Update
+2025-09-16 Checkout this blog post from Hashicorp: [Managing Ansible Automation Platform (AAP) credentials at scale with Vault](https://www.hashicorp.com/en/blog/managing-ansible-automation-platform-aap-credentials-at-scale-with-vault?sc_cid=701f2000000txokAAA&utm_source=bambu&utm_medium=organic_social_)

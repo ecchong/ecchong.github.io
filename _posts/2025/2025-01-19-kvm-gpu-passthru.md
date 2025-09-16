@@ -2,10 +2,12 @@
 title: Setting up Windows VM on RHEL with GPU passthru
 tags: ["rhel", "windows", "vm", "kvm", "libvirt", "gpu"]
 categories: RHEL
-last_modified_at: 2025-01-19
-published: false
+last_modified_at: 2025-09-16
+published: true
 description: "RHEL - Setting up Windows VM on RHEL with GPU passthru"
 ---
+### Background
+Instead of dual boot my PC, I want to use RHEL as my main OS and run the Windows 11 as a VM on top.  However, gaming will be terrible without a dedicated GPU for the Windows VM.  Here is my experience turning setting up GPU passthru for my setup.
 
 ### Hardware
 * CPU: AMD Ryzen 5 7600X with Radeon Graphics
@@ -102,9 +104,8 @@ Checkout these references of `evdev_helper`:
 * [Evdev guide: sharing mouse and keyboard between host and VM](https://www.youtube.com/watch?v=4XDvHQbgujI&t=4s)
 * [README](https://github.com/pavolelsig/evdev_helper/blob/main/README.md)
 
-Use 
-
 #### Audio
+The `pipewire` media server seems to work fine as generic Windows audio device.  User must login to host system to here to audio.
 
 #### CPU pinning
 TBD
