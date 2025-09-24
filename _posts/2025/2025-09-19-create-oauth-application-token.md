@@ -1,5 +1,5 @@
 ---
-title: Using AAP session authentication for API calls
+title: Using AAP Oauth Application
 tags: ["ansible", "aap", "api", "session", "token", "oauth", "platform" ]
 categories: Ansible
 last_modified_at: 2025-09-19
