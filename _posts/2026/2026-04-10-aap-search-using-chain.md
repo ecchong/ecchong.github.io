@@ -6,6 +6,7 @@ last_modified_at: 2026-04-10
 published: true
 description: "AAP - Find hosts that are imported from one inventory source but not from the other in an inventory"
 ---
+
 Within an inventory, we need to find hosts that are imported today from one source but not from the other.  This will require the chain filter.  Mindful of the double underscore "_" characters.
 
 ```yaml
