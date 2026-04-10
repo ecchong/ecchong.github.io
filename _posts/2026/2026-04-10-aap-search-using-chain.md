@@ -9,6 +9,7 @@ description: "AAP - Find hosts that are imported from one inventory source but n
 
 Within an inventory, we need to find hosts that are imported today from one source but not from the other.  This will require the chain filter.  Mindful of the double underscore "_" characters.
 
+{% raw %}
 ```yaml
 - name: Create API query to get list of hosts that are created today and only from in source A but not from source B
   ansible.builtin.set_fact:
@@ -32,3 +33,4 @@ Within an inventory, we need to find hosts that are imported today from one sour
   ansible.builtin.debug:
     msg: "{{_host_list.json.results | map(attribute='name') }}"
 ```
+{% endraw %}
